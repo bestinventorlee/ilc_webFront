@@ -48,7 +48,7 @@ function App() {
   }
 
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/ilc">
       <ScrollToTop />
       <Routes>
         {/* 공개 ILC 웹사이트 (ZIP 참고 레이아웃) */}
