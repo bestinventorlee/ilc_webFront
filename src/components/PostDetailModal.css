@@ -1,0 +1,93 @@
+.post-modal-content {
+  max-width: 800px;
+  max-height: 90vh;
+}
+
+.post-header-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+}
+
+.post-header-info h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.pinned-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  background: var(--primary-color);
+  color: white;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.post-modal-body {
+  padding: 2rem;
+}
+
+.post-meta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  padding: 1.5rem;
+  background: var(--bg-secondary);
+  border-radius: 8px;
+  margin-bottom: 2rem;
+}
+
+.post-meta-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.meta-label {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.meta-value {
+  font-size: 1rem;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.post-content {
+  margin-top: 2rem;
+}
+
+.content-text {
+  color: var(--text-primary);
+  line-height: 1.8;
+  font-size: 1rem;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+@media (max-width: 640px) {
+  .post-modal-content {
+    max-height: 95vh;
+    margin: 10px;
+  }
+
+  .post-header-info h2 {
+    font-size: 1.25rem;
+  }
+
+  .post-meta {
+    grid-template-columns: 1fr;
+    padding: 1rem;
+  }
+
+  .post-modal-body {
+    padding: 1.25rem 1.5rem;
+  }
+}
+

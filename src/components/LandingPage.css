@@ -1,0 +1,506 @@
+/* 회원 포털 — 공개 홈(ilc-site.css)과 동일 컴포넌트·팔레트 */
+
+.landing-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.container {
+  max-width: 80rem;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  width: 100%;
+}
+
+@media (min-width: 1024px) {
+  .container {
+    padding: 0 2rem;
+  }
+}
+
+/* 내비 옆 회원 포털 라벨 */
+.ilc-portal-nav__brand {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  flex-shrink: 0;
+  min-width: 0;
+}
+
+.ilc-portal-nav__sub {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #525252;
+  letter-spacing: 0.02em;
+}
+
+/* 히어로: 홈과 동일 다크 배경 위 2열(카피 + 폼) */
+.portal-hero {
+  min-height: auto;
+}
+
+.portal-hero .ilc-hero__inner {
+  padding-top: 3rem;
+  padding-bottom: 4rem;
+}
+
+.portal-hero__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+  align-items: start;
+  width: 100%;
+}
+
+.portal-hero__title {
+  font-size: clamp(1.75rem, 4vw, 2.75rem);
+  font-weight: 700;
+  line-height: 1.2;
+  color: #fff;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+.portal-hero__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.portal-hero__chip {
+  font-size: 0.875rem;
+  color: #e5e5e5;
+  padding: 0.4rem 0.85rem;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 9999px;
+}
+
+/* 로그인 카드 */
+.landing-page .hero-form {
+  position: relative;
+  z-index: 1;
+  background: #fff;
+  border-radius: 16px;
+  padding: 1.75rem;
+  border: 1px solid #e5e5e5;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+}
+
+.form-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.75rem;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.tab {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  background: none;
+  border: none;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #737373;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.tab::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #171717;
+  transform: scaleX(0);
+  transition: transform 0.2s;
+}
+
+.tab.active {
+  color: #171717;
+}
+
+.tab.active::after {
+  transform: scaleX(1);
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-group label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #404040;
+}
+
+.form-group input {
+  padding: 0.75rem 1rem;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.2s;
+  background: #fafafa;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #a3a3a3;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(23, 23, 23, 0.06);
+}
+
+.form-group input.error {
+  border-color: var(--error-color);
+}
+
+.form-group input.error:focus {
+  border-color: var(--error-color);
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.error-message {
+  display: block;
+  color: var(--error-color);
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+.password-hint {
+  display: block;
+  color: #737373;
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+.form-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.875rem;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  color: #404040;
+}
+
+.checkbox-label input[type='checkbox'] {
+  width: 1rem;
+  height: 1rem;
+  cursor: pointer;
+}
+
+.forgot-link {
+  color: #525252;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.forgot-link:hover {
+  color: #171717;
+  text-decoration: underline;
+}
+
+.landing-page__submit {
+  width: 100%;
+  justify-content: center;
+  margin-top: 0.5rem;
+}
+
+.landing-page__submit:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: spin 0.6s linear infinite;
+  margin-right: 0.5rem;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.alert {
+  padding: 0.875rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.875rem;
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.alert-success {
+  background-color: #d1fae5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+}
+
+.alert-error {
+  background-color: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+
+.alert-icon {
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.terms-text {
+  font-size: 0.75rem;
+  color: #737373;
+  text-align: center;
+  margin-top: 0.5rem;
+}
+
+.terms-text a {
+  color: #1d4ed8;
+  text-decoration: none;
+}
+
+.terms-text a:hover {
+  text-decoration: underline;
+}
+
+/* 섹션 — 홈페이지 타이포(#171717) */
+.about-section,
+.features-section {
+  padding: 5rem 0;
+}
+
+.ilc-lp-section--muted {
+  background: #fafafa;
+  border-top: 1px solid #e5e5e5;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.section-title {
+  font-size: clamp(1.75rem, 3vw, 2.5rem);
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 3rem;
+  color: #171717;
+  letter-spacing: -0.02em;
+}
+
+.about-content {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+}
+
+.about-card {
+  text-align: center;
+  padding: 1.5rem 1.25rem;
+  border-radius: 0;
+  border: 1px solid #e5e5e5;
+  background: #fff;
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+
+.about-card:hover {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.06);
+  border-color: #d4d4d4;
+}
+
+.card-icon {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.about-card h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+  color: #171717;
+}
+
+.about-card p {
+  color: #525252;
+  line-height: 1.75;
+  font-size: 1rem;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+}
+
+.feature-card {
+  background: #fff;
+  padding: 1.5rem;
+  border: 1px solid #e5e5e5;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.feature-card:hover {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.06);
+}
+
+.feature-card.clickable {
+  cursor: pointer;
+}
+
+.feature-card.clickable:hover {
+  border-color: #171717;
+}
+
+.feature-card-icon {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+.feature-card h3 {
+  font-size: 1.125rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: #171717;
+}
+
+.feature-card p {
+  color: #525252;
+  line-height: 1.65;
+  font-size: 0.9375rem;
+}
+
+/* 문의 CTA 영역 — ilc-home-cta 위 카드 가독 */
+.landing-contact {
+  position: relative;
+}
+
+.landing-contact__inner {
+  position: relative;
+  z-index: 1;
+}
+
+.landing-contact .contact-info-item {
+  background: #fff;
+  border: 1px solid #e5e5e5;
+}
+
+.landing-contact .ilc-home-cta__h2,
+.landing-contact .ilc-home-cta__p {
+  color: #171717;
+}
+
+.landing-contact .ilc-home-cta__p {
+  opacity: 0.85;
+}
+
+.contact-content {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.contact-info {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.contact-info-item {
+  text-align: center;
+  padding: 1.5rem;
+  border-radius: 0;
+  transition: box-shadow 0.2s;
+}
+
+.contact-info-item:hover {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.06);
+}
+
+.contact-icon {
+  font-size: 2rem;
+  margin-bottom: 0.75rem;
+}
+
+.contact-info-item h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #171717;
+  margin-bottom: 0.5rem;
+}
+
+.contact-info-item p {
+  color: #525252;
+  font-size: 0.9375rem;
+  margin: 0;
+}
+
+.contact-form-section {
+  text-align: center;
+}
+
+.landing-contact__btn {
+  min-width: 200px;
+  justify-content: center;
+}
+
+@media (max-width: 968px) {
+  .portal-hero__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .about-content {
+    grid-template-columns: 1fr;
+  }
+
+  .features-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .features-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .contact-info {
+    grid-template-columns: 1fr;
+  }
+
+  .landing-contact__btn {
+    width: 100%;
+  }
+}
