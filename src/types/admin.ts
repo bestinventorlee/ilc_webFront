@@ -23,7 +23,7 @@ export interface AdminMembership extends Membership {
 }
 
 export interface AdminPost extends Post {
-  userId: string
+  userId?: string
 }
 
 export interface AdminLibraryItem extends LibraryItem {
@@ -49,5 +49,4 @@ export interface AdminContact {
 import type { Membership } from './membership'
 import type { Post } from './community'
 import type { LibraryItem } from './library'
-import type { ContactFormData } from './contact'
 
