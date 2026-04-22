@@ -16,22 +16,15 @@ const AdminLibrary = () => {
   }, [])
 
   const loadItems = async () => {
-    // 더미 데이터
-    const dummyData: AdminLibraryItem[] = [
-      {
-        id: '1',
-        title: 'ILC 프로젝트 백서',
-        description: '프로젝트의 비전, 목표, 기술 스택에 대한 상세한 문서입니다.',
-        category: '문서',
-        fileType: 'pdf',
-        fileSize: 2048000,
-        uploadDate: '2024-01-15T10:00:00Z',
-        downloadCount: 1250,
-        author: '관리자',
-      },
-    ]
-    setItems(dummyData)
-    setIsLoading(false)
+    try {
+      setIsLoading(true)
+      const data = await getAdminLibraryItems()
+      setItems(data)
+    } catch (error) {
+      console.error('자료실 로드 오류:', error)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (

@@ -36,38 +36,8 @@ const AdminMemberships = () => {
 
   const loadMemberships = async () => {
     try {
-      // 더미 데이터
-      const dummyData: AdminMembership[] = [
-        {
-          id: '1',
-          membershipNumber: 'MEM-2024-001',
-          membershipType: '프리미엄 회원권',
-          joinDate: '2024-01-15',
-          expiryDate: '2025-12-31',
-          benefits: ['무제한 문서 다운로드', '프리미엄 커뮤니티'],
-          status: 'active',
-          remainingDays: 45,
-          price: 99000,
-          userId: '1',
-          userName: '홍길동',
-          userEmail: 'hong@example.com',
-        },
-        {
-          id: '2',
-          membershipNumber: 'MEM-2024-002',
-          membershipType: '베이직 회원권',
-          joinDate: '2024-01-20',
-          expiryDate: '2024-12-31',
-          benefits: ['기본 문서 다운로드'],
-          status: 'active',
-          remainingDays: 320,
-          price: 49000,
-          userId: '2',
-          userName: '김철수',
-          userEmail: 'kim@example.com',
-        },
-      ]
-      setMemberships(dummyData)
+      const membershipsData = await getAdminMemberships()
+      setMemberships(membershipsData)
     } catch (err) {
       console.error('회원권 로드 오류:', err)
     }
@@ -75,34 +45,8 @@ const AdminMemberships = () => {
 
   const loadUsers = async () => {
     try {
-      // 더미 데이터
-      const dummyUsers: AdminUser[] = [
-        {
-          id: '1',
-          name: '홍길동',
-          email: 'hong@example.com',
-          role: 'user',
-          createdAt: '2024-01-20T10:00:00Z',
-          lastLoginAt: '2024-01-25T14:30:00Z',
-        },
-        {
-          id: '2',
-          name: '김철수',
-          email: 'kim@example.com',
-          role: 'user',
-          createdAt: '2024-01-19T09:00:00Z',
-          lastLoginAt: '2024-01-25T11:20:00Z',
-        },
-        {
-          id: '3',
-          name: '이영희',
-          email: 'lee@example.com',
-          role: 'user',
-          createdAt: '2024-01-18T15:00:00Z',
-          lastLoginAt: '2024-01-24T16:45:00Z',
-        },
-      ]
-      setUsers(dummyUsers)
+      const usersData = await getUsers()
+      setUsers(usersData)
     } catch (err) {
       console.error('회원 로드 오류:', err)
     }
@@ -124,11 +68,8 @@ const AdminMemberships = () => {
     }
 
     try {
-      // API 호출 (더미)
-      // await deleteMembership(membershipId)
-      
-      // 더미 처리
-      setMemberships((prev) => prev.filter((m) => m.id !== membershipId))
+      await deleteMembership(membershipId)
+      await loadMemberships()
       alert('회원권이 삭제되었습니다.')
     } catch (err) {
       console.error('회원권 삭제 오류:', err)
@@ -154,35 +95,12 @@ const AdminMemberships = () => {
       }
 
       if (editingMembership) {
-        // 수정 모드
-        // const updated = await updateMembership(editingMembership.id, data)
-        
-        // 더미 처리
-        const updated: AdminMembership = {
-          ...editingMembership,
-          ...data,
-        }
-        setMemberships((prev) => prev.map((m) => (m.id === editingMembership.id ? updated : m)))
+        await updateMembership(editingMembership.id, data)
+        await loadMemberships()
         alert('회원권이 수정되었습니다.')
       } else {
-        // 생성 모드
-        // const newMembership = await createMembership(data)
-        
-        // 더미 처리
-        const newMembership: AdminMembership = {
-          id: Date.now().toString(),
-          membershipNumber: `MEM-2024-${String(memberships.length + 1).padStart(3, '0')}`,
-          ...data,
-          userId: data.userId,
-          userName: selectedUser.name,
-          userEmail: selectedUser.email,
-          remainingDays: data.expiryDate
-            ? Math.ceil(
-                (new Date(data.expiryDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)
-              )
-            : undefined,
-        }
-        setMemberships((prev) => [newMembership, ...prev])
+        await createMembership(data)
+        await loadMemberships()
         alert('회원권이 등록되었습니다.')
       }
       setShowFormModal(false)

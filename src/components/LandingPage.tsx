@@ -120,6 +120,7 @@ const LandingPage = () => {
             userId: response.data.userId,
             email: response.data.email,
             name: response.data.name,
+            role: response.data.role,
           })
 
           setSuccessMessage('로그인되었습니다!')
@@ -177,6 +178,7 @@ const LandingPage = () => {
           userId: response.data.userId,
           email: response.data.email,
           name: response.data.name,
+          role: response.data.role,
         })
 
         setSuccessMessage('회원가입이 완료되었습니다! 자동으로 로그인되었습니다.')

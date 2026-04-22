@@ -3,14 +3,12 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import Header from '../../components/Header'
 import PostFormModal from '../../components/PostFormModal'
 import { getAdminPosts, createNotice, updatePost, deletePost } from '../../services/adminService'
-import { getUser } from '../../utils/token'
 import type { AdminPost } from '../../types/admin'
 import './AdminPosts.css'
 
 const AdminPosts = () => {
   const navigate = useNavigate()
   const location = useLocation()
-  const user = getUser()
   const [posts, setPosts] = useState<AdminPost[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [filterType, setFilterType] = useState<'all' | 'notice' | 'community'>('all')
@@ -24,46 +22,8 @@ const AdminPosts = () => {
   const loadPosts = async () => {
     try {
       setIsLoading(true)
-      // 더미 데이터
-      const dummyData: AdminPost[] = [
-        {
-          id: '1',
-          title: 'ILC 프로젝트 업데이트 안내',
-          content: '안녕하세요. ILC 프로젝트의 새로운 업데이트가 진행되었습니다.\n\n주요 변경사항:\n- 회원권 관리 시스템 개선\n- 커뮤니티 기능 추가\n- 성능 최적화\n\n자세한 내용은 프로젝트 문서를 참고해주세요.',
-          author: '관리자',
-          authorId: 'admin',
-          createdAt: '2024-01-15T10:00:00Z',
-          views: 1250,
-          likes: 45,
-          type: 'notice',
-          isPinned: true,
-        },
-        {
-          id: '2',
-          title: '회원권 갱신 이벤트 안내',
-          content: '2024년 1월 한 달간 회원권 갱신 시 20% 할인 이벤트를 진행합니다.',
-          author: '관리자',
-          authorId: 'admin',
-          createdAt: '2024-01-10T09:30:00Z',
-          views: 890,
-          likes: 32,
-          type: 'notice',
-          isPinned: true,
-        },
-        {
-          id: '3',
-          title: '시스템 점검 안내',
-          content: '2024년 1월 20일 오전 2시부터 4시까지 시스템 점검이 진행됩니다.',
-          author: '관리자',
-          authorId: 'admin',
-          createdAt: '2024-01-18T14:00:00Z',
-          views: 456,
-          likes: 12,
-          type: 'notice',
-          isPinned: false,
-        },
-      ]
-      setPosts(dummyData)
+      const postsData = await getAdminPosts()
+      setPosts(postsData)
     } catch (err) {
       console.error('게시글 로드 오류:', err)
     } finally {
@@ -87,11 +47,8 @@ const AdminPosts = () => {
     }
 
     try {
-      // API 호출 (더미)
-      // await deletePost(postId)
-      
-      // 더미 처리
-      setPosts((prev) => prev.filter((p) => p.id !== postId))
+      await deletePost(postId)
+      await loadPosts()
       alert('게시글이 삭제되었습니다.')
     } catch (err) {
       console.error('게시글 삭제 오류:', err)
@@ -102,35 +59,12 @@ const AdminPosts = () => {
   const handleSavePost = async (data: { title: string; content: string; isPinned: boolean }) => {
     try {
       if (editingPost) {
-        // 수정 모드
-        // const updated = await updatePost(editingPost.id, data)
-        
-        // 더미 처리
-        const updated: AdminPost = {
-          ...editingPost,
-          ...data,
-          updatedAt: new Date().toISOString(),
-        }
-        setPosts((prev) => prev.map((p) => (p.id === editingPost.id ? updated : p)))
+        await updatePost(editingPost.id, data)
+        await loadPosts()
         alert('공지사항이 수정되었습니다.')
       } else {
-        // 생성 모드
-        // const newPost = await createNotice(data)
-        
-        // 더미 처리
-        const newPost: AdminPost = {
-          id: Date.now().toString(),
-          title: data.title,
-          content: data.content,
-          author: user?.name || '관리자',
-          authorId: user?.userId || 'admin',
-          createdAt: new Date().toISOString(),
-          views: 0,
-          likes: 0,
-          type: 'notice',
-          isPinned: data.isPinned,
-        }
-        setPosts((prev) => [newPost, ...prev])
+        await createNotice(data)
+        await loadPosts()
         alert('공지사항이 등록되었습니다.')
       }
       setShowFormModal(false)

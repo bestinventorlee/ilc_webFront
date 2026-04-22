@@ -26,47 +26,8 @@ const AdminDashboard = () => {
     try {
       setIsLoading(true)
       setError(null)
-      
-      // API가 없을 경우를 대비해 더미 데이터 사용
-      // 실제 API가 준비되면 아래 주석을 해제하고 더미 데이터 부분을 제거하세요
-      // const data = await getAdminStats()
-      // setStats(data)
-
-      // 더미 데이터
-      const dummyStats: AdminStats = {
-        totalUsers: 1250,
-        totalMemberships: 890,
-        totalPosts: 345,
-        totalLibraryItems: 67,
-        totalContacts: 23,
-        recentUsers: [
-          {
-            id: '1',
-            name: '홍길동',
-            email: 'hong@example.com',
-            role: 'user',
-            createdAt: '2024-01-20T10:00:00Z',
-            lastLoginAt: '2024-01-25T14:30:00Z',
-          },
-          {
-            id: '2',
-            name: '김철수',
-            email: 'kim@example.com',
-            role: 'user',
-            createdAt: '2024-01-19T09:00:00Z',
-            lastLoginAt: '2024-01-25T11:20:00Z',
-          },
-          {
-            id: '3',
-            name: '이영희',
-            email: 'lee@example.com',
-            role: 'user',
-            createdAt: '2024-01-18T15:00:00Z',
-            lastLoginAt: '2024-01-24T16:45:00Z',
-          },
-        ],
-      }
-      setStats(dummyStats)
+      const data = await getAdminStats()
+      setStats(data)
     } catch (err) {
       setError(err instanceof Error ? err.message : '통계를 불러오는데 실패했습니다.')
       console.error('통계 로드 오류:', err)

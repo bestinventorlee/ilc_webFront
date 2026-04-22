@@ -29,43 +29,8 @@ const AdminContacts = () => {
     try {
       setIsLoading(true)
       setError(null)
-      
-      // 더미 데이터
-      const dummyContacts: AdminContact[] = [
-        {
-          id: '1',
-          name: '홍길동',
-          email: 'hong@example.com',
-          phone: '010-1234-5678',
-          subject: '회원권 갱신 문의',
-          message: '회원권을 갱신하고 싶은데 어떻게 해야 하나요?',
-          submittedAt: '2024-01-25T10:00:00Z',
-          status: 'pending',
-        },
-        {
-          id: '2',
-          name: '김철수',
-          email: 'kim@example.com',
-          subject: '다운로드 오류',
-          message: '자료실에서 파일을 다운로드할 수 없습니다.',
-          submittedAt: '2024-01-24T14:30:00Z',
-          status: 'answered',
-          answer: '파일 다운로드 문제를 확인했습니다. 곧 수정하겠습니다.',
-          answeredAt: '2024-01-24T16:00:00Z',
-        },
-        {
-          id: '3',
-          name: '이영희',
-          email: 'lee@example.com',
-          subject: '프리미엄 회원권 혜택',
-          message: '프리미엄 회원권의 혜택이 무엇인가요?',
-          submittedAt: '2024-01-23T09:15:00Z',
-          status: 'closed',
-          answer: '프리미엄 회원권은 모든 기능을 무제한으로 이용하실 수 있습니다.',
-          answeredAt: '2024-01-23T10:00:00Z',
-        },
-      ]
-      setContacts(dummyContacts)
+      const contactsData = await getAdminContacts()
+      setContacts(contactsData)
     } catch (err) {
       setError(err instanceof Error ? err.message : '문의 목록을 불러오는데 실패했습니다.')
     } finally {
@@ -80,22 +45,8 @@ const AdminContacts = () => {
     }
 
     try {
-      // API 호출 (더미)
-      // await answerContact(contactId, answerText)
-      
-      // 더미 처리
-      setContacts((prev) =>
-        prev.map((contact) =>
-          contact.id === contactId
-            ? {
-                ...contact,
-                status: 'answered' as const,
-                answer: answerText,
-                answeredAt: new Date().toISOString(),
-              }
-            : contact
-        )
-      )
+      await answerContact(contactId, answerText)
+      await loadContacts()
       setSelectedContact(null)
       setAnswerText('')
       alert('답변이 등록되었습니다.')

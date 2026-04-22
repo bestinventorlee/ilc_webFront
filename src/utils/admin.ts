@@ -9,15 +9,18 @@ export const isAdmin = (): boolean => {
   const user = getUser()
   if (!user) return false
   
-  // 임시: admin@ilc.com 이메일을 가진 사용자를 관리자로 간주
-  // 실제로는 서버에서 역할(role)을 확인해야 합니다
+  if (user.role) {
+    return user.role === 'admin'
+  }
+
+  // role 필드가 없는 구버전 세션 대응
   return user.email === 'admin@ilc.com' || user.email.endsWith('@admin.ilc.com')
 }
 
 /**
  * 관리자 라우트 보호를 위한 체크
  */
-export const checkAdminAccess = (): { isAdmin: boolean; user: { userId: string; email: string; name: string } | null } => {
+export const checkAdminAccess = (): { isAdmin: boolean; user: { userId: string; email: string; name: string; role?: 'admin' | 'user' } | null } => {
   const user = getUser()
   if (!user) {
     return { isAdmin: false, user: null }
