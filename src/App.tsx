@@ -22,6 +22,7 @@ import AdminMemberships from './pages/admin/AdminMemberships'
 import AdminPosts from './pages/admin/AdminPosts'
 import AdminLibrary from './pages/admin/AdminLibrary'
 import AdminContacts from './pages/admin/AdminContacts'
+import AdminSiteContent from './pages/admin/AdminSiteContent'
 import { autoRefreshTokenIfNeeded, isAuthenticated } from './utils/token'
 import ScrollToTop from './components/ScrollToTop'
 import './App.css'
@@ -160,6 +161,14 @@ function App() {
           element={
             <AdminRoute>
               <AdminContacts />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/site-content"
+          element={
+            <AdminRoute>
+              <AdminSiteContent />
             </AdminRoute>
           }
         />

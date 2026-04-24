@@ -208,6 +208,12 @@ const AdminDashboard = () => {
                 >
                   문의 확인
                 </button>
+                <button
+                  className="action-btn"
+                  onClick={() => navigate('/admin/site-content')}
+                >
+                  메인 콘텐츠 편집
+                </button>
               </div>
             </div>
           </>

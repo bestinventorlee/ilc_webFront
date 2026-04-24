@@ -7,6 +7,7 @@ import type {
   AdminLibraryItem,
   AdminContact,
 } from '../types/admin'
+import type { HomeSiteContent } from '../types/siteContent'
 
 // AdminMembership을 export하기 위해 다시 import
 export type { AdminMembership } from '../types/admin'
@@ -446,6 +447,69 @@ export const deleteMembership = async (membershipId: string): Promise<void> => {
       throw error
     }
     throw new Error('회원권 삭제 중 오류가 발생했습니다.')
+  }
+}
+
+export const getAdminSiteContent = async (key: string): Promise<Record<string, unknown> | null> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/admin/site-content/${key}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeader(),
+      },
+    })
+    const result = await response.json()
+    if (!response.ok) {
+      throw new Error(result.message || '사이트 콘텐츠 조회에 실패했습니다.')
+    }
+    return result.data || null
+  } catch (error) {
+    if (error instanceof Error) throw error
+    throw new Error('사이트 콘텐츠 조회 중 오류가 발생했습니다.')
+  }
+}
+
+export const updateAdminSiteContent = async (
+  key: string,
+  content: HomeSiteContent
+): Promise<HomeSiteContent> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/admin/site-content/${key}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeader(),
+      },
+      body: JSON.stringify({ content }),
+    })
+    const result = await response.json()
+    if (!response.ok) {
+      throw new Error(result.message || '사이트 콘텐츠 저장에 실패했습니다.')
+    }
+    return result.data as HomeSiteContent
+  } catch (error) {
+    if (error instanceof Error) throw error
+    throw new Error('사이트 콘텐츠 저장 중 오류가 발생했습니다.')
+  }
+}
+
+export const getPublicSiteContent = async <T>(key: string): Promise<T | null> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/content/${key}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+    const result = await response.json()
+    if (!response.ok) {
+      throw new Error(result.message || '공개 콘텐츠 조회에 실패했습니다.')
+    }
+    return (result.data as T) || null
+  } catch (error) {
+    if (error instanceof Error) throw error
+    throw new Error('공개 콘텐츠 조회 중 오류가 발생했습니다.')
   }
 }
 

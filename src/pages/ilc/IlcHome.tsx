@@ -1,5 +1,8 @@
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { publicProjects } from '../../data/ilcPublicData'
+import { getPublicSiteContent } from '../../services/adminService'
+import type { HomeSiteContent } from '../../types/siteContent'
 import './ilc-site.css'
 
 /** 참고: ILC Jeju Web3.0 레이아웃 — 마리나 히어로·2열 카드·인사이트 패널 */
@@ -58,6 +61,32 @@ function ArrowRight() {
 const FEATURED_THUMBS = [IMG_ASSET1, IMG_ASSET2, IMG_ASSET3] as const
 
 export default function IlcHome() {
+  const defaultContent: HomeSiteContent = {
+    heroEyebrow: 'ILC JEJU · WEB3.0',
+    heroTitle: 'ILC',
+    heroLead: '혁신을 만들어가는 사람들의 커뮤니티.\n프로젝트와 네트워크를 한곳에서 연결합니다.',
+    ctaTitle: '지금 바로 시작하세요',
+    ctaLead: 'ILC 회원이 되어 다양한 프로젝트에 참여하고\n네트워크를 확장하세요',
+  }
+  const [content, setContent] = useState<HomeSiteContent>(defaultContent)
+
+  useEffect(() => {
+    const loadContent = async () => {
+      try {
+        const loaded = await getPublicSiteContent<HomeSiteContent>('home')
+        if (loaded) {
+          setContent({
+            ...defaultContent,
+            ...loaded,
+          })
+        }
+      } catch (error) {
+        console.error('홈 콘텐츠 로드 오류:', error)
+      }
+    }
+    loadContent()
+  }, [])
+
   const featuredProjects = publicProjects.slice(0, 3).map((p, i) => ({
     ...p,
     thumb: FEATURED_THUMBS[i] ?? IMG_ASSET1,
@@ -86,14 +115,17 @@ export default function IlcHome() {
               <div className="ilc-hero-card__gradient" />
             </div>
             <div className="ilc-hero-card__content">
-              <p className="ilc-hero-card__eyebrow">ILC JEJU · WEB3.0</p>
+              <p className="ilc-hero-card__eyebrow">{content.heroEyebrow}</p>
               <h1 id="ilc-hero-title" className="ilc-hero-card__title">
-                ILC
+                {content.heroTitle}
               </h1>
               <p className="ilc-hero-card__lead">
-                혁신을 만들어가는 사람들의 커뮤니티.
-                <br />
-                프로젝트와 네트워크를 한곳에서 연결합니다.
+                {content.heroLead.split('\n').map((line, idx) => (
+                  <span key={`${line}-${idx}`}>
+                    {line}
+                    {idx < content.heroLead.split('\n').length - 1 && <br />}
+                  </span>
+                ))}
               </p>
               <div className="ilc-hero-card__actions">
                 <Link to="/projects" className="ilc-btn-white ilc-btn-white--shadow">
@@ -212,11 +244,14 @@ export default function IlcHome() {
       <section className="ilc-home-cta">
         <div className="ilc-home-cta__blur" aria-hidden />
         <div className="ilc-home-cta__inner">
-          <h2 className="ilc-home-cta__h2">지금 바로 시작하세요</h2>
+          <h2 className="ilc-home-cta__h2">{content.ctaTitle}</h2>
           <p className="ilc-home-cta__p">
-            ILC 회원이 되어 다양한 프로젝트에 참여하고
-            <br />
-            네트워크를 확장하세요
+            {content.ctaLead.split('\n').map((line, idx) => (
+              <span key={`${line}-${idx}`}>
+                {line}
+                {idx < content.ctaLead.split('\n').length - 1 && <br />}
+              </span>
+            ))}
           </p>
           <Link to="/portal" className="ilc-btn-dark">
             회원가입 / 로그인
