@@ -26,65 +26,8 @@ const Membership = () => {
     try {
       setIsLoading(true)
       setError(null)
-      // API가 없을 경우를 대비해 더미 데이터 사용
-      // 실제 API가 준비되면 아래 주석을 해제하고 더미 데이터 부분을 제거하세요
-      // const data = await getMemberships()
-      // setMemberships(data)
-      
-      // 더미 데이터 (API가 준비될 때까지 사용)
-      const dummyData: MembershipType[] = [
-        {
-          id: '1',
-          membershipNumber: 'MEM-2024-001',
-          membershipType: '프리미엄 회원권',
-          joinDate: '2024-01-15',
-          expiryDate: '2025-12-31',
-          benefits: [
-            '무제한 프로젝트 문서 다운로드',
-            '프리미엄 커뮤니티 접근',
-            '우선 고객 지원',
-            '월간 리포트 제공',
-            '할인 혜택 20%',
-          ],
-          status: 'active',
-          remainingDays: 45,
-          price: 99000,
-          description: '프리미엄 회원권으로 모든 기능을 무제한으로 이용하실 수 있습니다.',
-        },
-        {
-          id: '2',
-          membershipNumber: 'MEM-2024-002',
-          membershipType: '베이직 회원권',
-          joinDate: '2024-03-20',
-          expiryDate: '2025-03-20',
-          benefits: [
-            '기본 프로젝트 문서 다운로드',
-            '커뮤니티 접근',
-            '일반 고객 지원',
-            '할인 혜택 10%',
-          ],
-          status: 'active',
-          remainingDays: 120,
-          price: 49000,
-          description: '베이직 회원권으로 기본 기능을 이용하실 수 있습니다.',
-        },
-        {
-          id: '3',
-          membershipNumber: 'MEM-2023-005',
-          membershipType: '스탠다드 회원권',
-          joinDate: '2023-06-10',
-          expiryDate: '2024-06-10',
-          benefits: [
-            '제한된 문서 다운로드',
-            '커뮤니티 읽기 전용',
-          ],
-          status: 'expired',
-          remainingDays: 0,
-          price: 29000,
-          description: '만료된 회원권입니다.',
-        },
-      ]
-      setMemberships(dummyData)
+      const data = await getMemberships()
+      setMemberships(data)
     } catch (err) {
       setError(err instanceof Error ? err.message : '회원권 목록을 불러오는데 실패했습니다.')
       console.error('회원권 목록 로드 오류:', err)
@@ -95,16 +38,8 @@ const Membership = () => {
 
   const handleMembershipClick = async (membershipId: string) => {
     try {
-      // API가 없을 경우를 대비해 더미 데이터 사용
-      // 실제 API가 준비되면 아래 주석을 해제하고 더미 데이터 부분을 제거하세요
-      // const detail = await getMembershipDetail(membershipId)
-      // setSelectedMembership(detail)
-      
-      // 더미 데이터에서 찾기
-      const membership = memberships.find((m) => m.id === membershipId)
-      if (membership) {
-        setSelectedMembership(membership)
-      }
+      const detail = await getMembershipDetail(membershipId)
+      setSelectedMembership(detail)
     } catch (err) {
       console.error('회원권 상세 정보 로드 오류:', err)
       alert('회원권 상세 정보를 불러오는데 실패했습니다.')
