@@ -22,6 +22,17 @@ export interface AdminMembership extends Membership {
   userEmail: string
 }
 
+export interface AdminMembershipType {
+  id: string
+  name: string
+  defaultDurationDays?: number
+  benefits: string[]
+  price?: number
+  description?: string
+  createdAt: string
+  updatedAt: string
+}
+
 export interface AdminPost extends Post {
   userId?: string
 }

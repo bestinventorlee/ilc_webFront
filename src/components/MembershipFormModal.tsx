@@ -1,10 +1,22 @@
-import { useState, useEffect } from 'react'
-import type { AdminMembership, AdminUser } from '../types/admin'
+import { useState, useEffect, useCallback } from 'react'
+import type { AdminMembership, AdminMembershipType, AdminUser } from '../types/admin'
 import './MembershipFormModal.css'
+
+function addDaysFromJoinDate(joinDate: string, days: number): string {
+  const d = new Date(joinDate + 'T12:00:00')
+  d.setDate(d.getDate() + days)
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${y}-${m}-${day}`
+}
 
 interface MembershipFormModalProps {
   membership?: AdminMembership | null
   users: AdminUser[]
+  membershipTypes: AdminMembershipType[]
+  presetUserId?: string | null
+  onPresetConsumed?: () => void
   onClose: () => void
   onSave: (data: {
     userId: string
@@ -18,8 +30,17 @@ interface MembershipFormModalProps {
   }) => void
 }
 
-const MembershipFormModal = ({ membership, users, onClose, onSave }: MembershipFormModalProps) => {
+const MembershipFormModal = ({
+  membership,
+  users,
+  membershipTypes,
+  presetUserId,
+  onPresetConsumed,
+  onClose,
+  onSave,
+}: MembershipFormModalProps) => {
   const [userId, setUserId] = useState(membership?.userId || '')
+  const [selectedTypeId, setSelectedTypeId] = useState('')
   const [membershipType, setMembershipType] = useState(membership?.membershipType || '')
   const [joinDate, setJoinDate] = useState(membership?.joinDate || '')
   const [expiryDate, setExpiryDate] = useState(membership?.expiryDate || '')
@@ -29,6 +50,36 @@ const MembershipFormModal = ({ membership, users, onClose, onSave }: MembershipF
   const [status, setStatus] = useState<'active' | 'expired' | 'suspended'>(membership?.status || 'active')
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [isLoading, setIsLoading] = useState(false)
+
+  const applyTypeTemplate = useCallback(
+    (type: AdminMembershipType, join: string) => {
+      setMembershipType(type.name)
+      setBenefits(type.benefits.join('\n'))
+      setPrice(type.price != null ? String(type.price) : '')
+      setDescription(type.description ?? '')
+      if (type.defaultDurationDays != null && join) {
+        setExpiryDate(addDaysFromJoinDate(join, type.defaultDurationDays))
+      }
+    },
+    []
+  )
+
+  useEffect(() => {
+    if (!membership) {
+      setSelectedTypeId('')
+      return
+    }
+    const match = membershipTypes.find((t) => t.name === membership.membershipType)
+    setSelectedTypeId(match ? match.id : '__orphan__')
+  }, [membership, membershipTypes])
+
+  useEffect(() => {
+    if (membership) return
+    if (!presetUserId) return
+    if (!users.some((u) => u.id === presetUserId)) return
+    setUserId(presetUserId)
+    onPresetConsumed?.()
+  }, [presetUserId, users, membership, onPresetConsumed])
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -54,7 +105,16 @@ const MembershipFormModal = ({ membership, users, onClose, onSave }: MembershipF
     }
 
     if (!membershipType.trim()) {
-      newErrors.membershipType = '회원권 종류를 입력해주세요.'
+      newErrors.membershipType = '회원권 종류를 선택해주세요.'
+    }
+
+    if (!membership) {
+      if (membershipTypes.length === 0) {
+        newErrors.membershipType =
+          '등록된 회원권 종류가 없습니다. 관리 메뉴의 「회원권 종류」에서 먼저 등록해주세요.'
+      } else if (!selectedTypeId) {
+        newErrors.membershipType = '목록에서 회원권 종류를 선택해주세요.'
+      }
     }
 
     if (!joinDate) {
@@ -78,25 +138,58 @@ const MembershipFormModal = ({ membership, users, onClose, onSave }: MembershipF
 
     setIsLoading(true)
     const benefitsArray = benefits.split('\n').filter((b) => b.trim())
-    
+
     onSave({
       userId,
       membershipType: membershipType.trim(),
       joinDate,
       expiryDate: expiryDate || undefined,
       benefits: benefitsArray,
-      price: price ? parseInt(price) : undefined,
+      price: price ? parseInt(price, 10) : undefined,
       description: description.trim() || undefined,
       status,
     })
     setIsLoading(false)
   }
 
+  const handleTypeSelect = (id: string) => {
+    setSelectedTypeId(id)
+    if (errors.membershipType) {
+      setErrors((prev) => {
+        const next = { ...prev }
+        delete next.membershipType
+        return next
+      })
+    }
+    if (!id) {
+      return
+    }
+    if (id === '__orphan__') {
+      if (membership) {
+        setMembershipType(membership.membershipType)
+        setBenefits(membership.benefits.join('\n'))
+        setPrice(membership.price?.toString() ?? '')
+        setDescription(membership.description ?? '')
+        setExpiryDate(membership.expiryDate ?? '')
+      }
+      return
+    }
+    const t = membershipTypes.find((x) => x.id === id)
+    if (!t) return
+    applyTypeTemplate(t, joinDate)
+  }
+
   const handleChange = (field: string, value: string) => {
     if (field === 'userId') setUserId(value)
-    else if (field === 'membershipType') setMembershipType(value)
-    else if (field === 'joinDate') setJoinDate(value)
-    else if (field === 'expiryDate') setExpiryDate(value)
+    else if (field === 'joinDate') {
+      setJoinDate(value)
+      if (selectedTypeId && selectedTypeId !== '__orphan__') {
+        const t = membershipTypes.find((x) => x.id === selectedTypeId)
+        if (t?.defaultDurationDays != null && value) {
+          setExpiryDate(addDaysFromJoinDate(value, t.defaultDurationDays))
+        }
+      }
+    } else if (field === 'expiryDate') setExpiryDate(value)
     else if (field === 'benefits') setBenefits(value)
     else if (field === 'price') setPrice(value)
     else if (field === 'description') setDescription(value)
@@ -111,6 +204,11 @@ const MembershipFormModal = ({ membership, users, onClose, onSave }: MembershipF
     }
   }
 
+  const orphanOption =
+    membership && !membershipTypes.some((t) => t.name === membership.membershipType) ? (
+      <option value="__orphan__">{membership.membershipType} (카탈로그에 없음)</option>
+    ) : null
+
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content membership-form-modal-content" onClick={(e) => e.stopPropagation()}>
@@ -121,6 +219,7 @@ const MembershipFormModal = ({ membership, users, onClose, onSave }: MembershipF
             onClick={onClose}
             aria-label="닫기"
             disabled={isLoading}
+            type="button"
           >
             ×
           </button>
@@ -150,19 +249,28 @@ const MembershipFormModal = ({ membership, users, onClose, onSave }: MembershipF
             </div>
 
             <div className="form-group">
-              <label htmlFor="membershipType">
+              <label htmlFor="membershipTypeSelect">
                 회원권 종류 <span className="required">*</span>
               </label>
-              <input
-                type="text"
-                id="membershipType"
-                value={membershipType}
-                onChange={(e) => handleChange('membershipType', e.target.value)}
+              <select
+                id="membershipTypeSelect"
+                value={selectedTypeId}
+                onChange={(e) => handleTypeSelect(e.target.value)}
                 disabled={isLoading}
                 className={errors.membershipType ? 'error' : ''}
-                placeholder="예: 프리미엄 회원권"
-              />
+              >
+                <option value="">등록된 종류에서 선택</option>
+                {membershipTypes.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.name}
+                  </option>
+                ))}
+                {orphanOption}
+              </select>
               {errors.membershipType && <span className="field-error">{errors.membershipType}</span>}
+              <p className="field-hint" style={{ marginTop: '0.35rem', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+                「회원권 종류」 메뉴에서 먼저 종류를 등록한 뒤, 여기서 선택하면 혜택·가격 등이 채워집니다.
+              </p>
             </div>
 
             <div className="form-row">
@@ -182,7 +290,7 @@ const MembershipFormModal = ({ membership, users, onClose, onSave }: MembershipF
               </div>
 
               <div className="form-group">
-                <label htmlFor="expiryDate">만료일</label>
+                <label htmlFor="expiryDate">만료일 (유효기간 종료)</label>
                 <input
                   type="date"
                   id="expiryDate"
@@ -190,6 +298,9 @@ const MembershipFormModal = ({ membership, users, onClose, onSave }: MembershipF
                   onChange={(e) => handleChange('expiryDate', e.target.value)}
                   disabled={isLoading}
                 />
+                <p className="field-hint" style={{ marginTop: '0.25rem', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                  종류에 기본 일수가 있으면 선택 시 자동으로 채워지며, 필요하면 여기서 수정할 수 있습니다.
+                </p>
               </div>
             </div>
 
@@ -271,4 +382,3 @@ const MembershipFormModal = ({ membership, users, onClose, onSave }: MembershipF
 }
 
 export default MembershipFormModal
-

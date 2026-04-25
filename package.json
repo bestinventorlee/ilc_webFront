@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "server:dev": "cd server && npm run dev",
-    "server:install": "cd server && npm install"
+    "server:install": "cd server && npm install",
+    "server:db-clear-non-user": "cd server && npm run db:clear-non-user --"
   },
   "dependencies": {
     "react": "^18.2.0",

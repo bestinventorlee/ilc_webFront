@@ -19,6 +19,7 @@ import Library from './pages/Library'
 import AdminDashboard from './pages/admin/AdminDashboard'
 import AdminUsers from './pages/admin/AdminUsers'
 import AdminMemberships from './pages/admin/AdminMemberships'
+import AdminMembershipTypes from './pages/admin/AdminMembershipTypes'
 import AdminPosts from './pages/admin/AdminPosts'
 import AdminLibrary from './pages/admin/AdminLibrary'
 import AdminContacts from './pages/admin/AdminContacts'
@@ -129,6 +130,14 @@ function App() {
           element={
             <AdminRoute>
               <AdminUsers />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/membership-types"
+          element={
+            <AdminRoute>
+              <AdminMembershipTypes />
             </AdminRoute>
           }
         />

@@ -5,9 +5,10 @@ import './UserDetailModal.css'
 interface UserDetailModalProps {
   user: AdminUser
   onClose: () => void
+  onRegisterMembership?: () => void
 }
 
-const UserDetailModal = ({ user, onClose }: UserDetailModalProps) => {
+const UserDetailModal = ({ user, onClose, onRegisterMembership }: UserDetailModalProps) => {
   useEffect(() => {
     // ESC 키로 모달 닫기
     const handleEscape = (e: KeyboardEvent) => {
@@ -82,7 +83,12 @@ const UserDetailModal = ({ user, onClose }: UserDetailModalProps) => {
         </div>
 
         <div className="modal-footer user-detail-footer">
-          <button className="form-btn close-btn" onClick={onClose}>
+          {onRegisterMembership && (
+            <button type="button" className="membership-register-btn" onClick={onRegisterMembership}>
+              회원권 등록
+            </button>
+          )}
+          <button type="button" className="close-btn" onClick={onClose}>
             닫기
           </button>
         </div>

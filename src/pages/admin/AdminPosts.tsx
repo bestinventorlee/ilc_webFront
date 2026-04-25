@@ -112,6 +112,12 @@ const AdminPosts = () => {
             회원 관리
           </button>
           <button
+            className={`nav-btn ${location.pathname === '/admin/membership-types' ? 'active' : ''}`}
+            onClick={() => navigate('/admin/membership-types')}
+          >
+            회원권 종류
+          </button>
+          <button
             className={`nav-btn ${location.pathname === '/admin/memberships' ? 'active' : ''}`}
             onClick={() => navigate('/admin/memberships')}
           >

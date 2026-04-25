@@ -3,6 +3,7 @@ import type {
   AdminStats,
   AdminUser,
   AdminMembership,
+  AdminMembershipType,
   AdminPost,
   AdminLibraryItem,
   AdminContact,
@@ -10,7 +11,7 @@ import type {
 import type { HomeSiteContent } from '../types/siteContent'
 
 // AdminMembership을 export하기 위해 다시 import
-export type { AdminMembership } from '../types/admin'
+export type { AdminMembership, AdminMembershipType } from '../types/admin'
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
 
@@ -104,6 +105,92 @@ export const getAdminMemberships = async (): Promise<AdminMembership[]> => {
       throw error
     }
     throw new Error('회원권 목록 조회 중 오류가 발생했습니다.')
+  }
+}
+
+export const getAdminMembershipTypes = async (): Promise<AdminMembershipType[]> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/admin/membership-types`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeader(),
+      },
+    })
+    const result = await response.json()
+    if (!response.ok) {
+      throw new Error(result.message || '회원권 종류 목록 조회에 실패했습니다.')
+    }
+    return result.data || []
+  } catch (error) {
+    if (error instanceof TypeError && error.message === 'Failed to fetch') {
+      throw new Error('서버에 연결할 수 없습니다.')
+    }
+    if (error instanceof Error) {
+      throw error
+    }
+    throw new Error('회원권 종류 목록 조회 중 오류가 발생했습니다.')
+  }
+}
+
+export const createMembershipType = async (data: {
+  name: string
+  defaultDurationDays?: number | null
+  benefits: string[]
+  price?: number | null
+  description?: string | null
+}): Promise<AdminMembershipType> => {
+  const response = await fetch(`${API_BASE_URL}/admin/membership-types`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...getAuthHeader(),
+    },
+    body: JSON.stringify(data),
+  })
+  const result = await response.json()
+  if (!response.ok) {
+    throw new Error(result.message || '회원권 종류 등록에 실패했습니다.')
+  }
+  return result.data
+}
+
+export const updateMembershipType = async (
+  id: string,
+  data: {
+    name: string
+    defaultDurationDays?: number | null
+    benefits: string[]
+    price?: number | null
+    description?: string | null
+  }
+): Promise<AdminMembershipType> => {
+  const response = await fetch(`${API_BASE_URL}/admin/membership-types/${id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      ...getAuthHeader(),
+    },
+    body: JSON.stringify(data),
+  })
+  const result = await response.json()
+  if (!response.ok) {
+    throw new Error(result.message || '회원권 종류 수정에 실패했습니다.')
+  }
+  return result.data
+}
+
+export const deleteMembershipType = async (id: string): Promise<void> => {
+  const response = await fetch(`${API_BASE_URL}/admin/membership-types/${id}`, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+      ...getAuthHeader(),
+    },
+  })
+  const result = await response.json()
+  if (!response.ok) {
+    throw new Error(result.message || '회원권 종류 삭제에 실패했습니다.')
   }
 }
 

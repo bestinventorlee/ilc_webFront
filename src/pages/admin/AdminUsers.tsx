@@ -79,6 +79,12 @@ const AdminUsers = () => {
             회원 관리
           </button>
           <button
+            className={`nav-btn ${location.pathname === '/admin/membership-types' ? 'active' : ''}`}
+            onClick={() => navigate('/admin/membership-types')}
+          >
+            회원권 종류
+          </button>
+          <button
             className={`nav-btn ${location.pathname === '/admin/memberships' ? 'active' : ''}`}
             onClick={() => navigate('/admin/memberships')}
           >
@@ -164,12 +170,22 @@ const AdminUsers = () => {
                         {user.lastLoginAt ? formatDate(user.lastLoginAt) : '-'}
                       </td>
                       <td>
-                        <button
-                          className="action-btn-small"
-                          onClick={() => setSelectedUser(user)}
-                        >
-                          상세
-                        </button>
+                        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                          <button
+                            type="button"
+                            className="action-btn-small"
+                            onClick={() => setSelectedUser(user)}
+                          >
+                            상세
+                          </button>
+                          <button
+                            type="button"
+                            className="action-btn-small edit-btn"
+                            onClick={() => navigate(`/admin/memberships?presetUser=${user.id}`)}
+                          >
+                            회원권
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))
@@ -183,6 +199,10 @@ const AdminUsers = () => {
           <UserDetailModal
             user={selectedUser}
             onClose={() => setSelectedUser(null)}
+            onRegisterMembership={() => {
+              navigate(`/admin/memberships?presetUser=${selectedUser.id}`)
+              setSelectedUser(null)
+            }}
           />
         )}
       </div>

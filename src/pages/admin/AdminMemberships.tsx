@@ -1,34 +1,49 @@
 import { useEffect, useState } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useNavigate, useLocation, useSearchParams } from 'react-router-dom'
 import Header from '../../components/Header'
 import MembershipFormModal from '../../components/MembershipFormModal'
 import {
   getAdminMemberships,
+  getAdminMembershipTypes,
   getUsers,
   createMembership,
   updateMembership,
   deleteMembership,
 } from '../../services/adminService'
-import type { AdminMembership, AdminUser } from '../../types/admin'
+import type { AdminMembership, AdminMembershipType, AdminUser } from '../../types/admin'
 import './AdminMemberships.css'
 
 const AdminMemberships = () => {
   const navigate = useNavigate()
   const location = useLocation()
+  const [searchParams, setSearchParams] = useSearchParams()
   const [memberships, setMemberships] = useState<AdminMembership[]>([])
   const [users, setUsers] = useState<AdminUser[]>([])
+  const [membershipTypes, setMembershipTypes] = useState<AdminMembershipType[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [showFormModal, setShowFormModal] = useState(false)
   const [editingMembership, setEditingMembership] = useState<AdminMembership | null>(null)
+  const [presetUserId, setPresetUserId] = useState<string | null>(null)
 
   useEffect(() => {
     loadData()
   }, [])
 
+  useEffect(() => {
+    const p = searchParams.get('presetUser')
+    if (!p) return
+    setPresetUserId(p)
+    setEditingMembership(null)
+    setShowFormModal(true)
+    const next = new URLSearchParams(searchParams)
+    next.delete('presetUser')
+    setSearchParams(next, { replace: true })
+  }, [searchParams, setSearchParams])
+
   const loadData = async () => {
     try {
       setIsLoading(true)
-      await Promise.all([loadMemberships(), loadUsers()])
+      await Promise.all([loadMemberships(), loadUsers(), loadMembershipTypes()])
     } finally {
       setIsLoading(false)
     }
@@ -52,12 +67,23 @@ const AdminMemberships = () => {
     }
   }
 
+  const loadMembershipTypes = async () => {
+    try {
+      const types = await getAdminMembershipTypes()
+      setMembershipTypes(types)
+    } catch (err) {
+      console.error('회원권 종류 로드 오류:', err)
+    }
+  }
+
   const handleCreateMembership = () => {
     setEditingMembership(null)
+    setPresetUserId(null)
     setShowFormModal(true)
   }
 
   const handleEditMembership = (membership: AdminMembership) => {
+    setPresetUserId(null)
     setEditingMembership(membership)
     setShowFormModal(true)
   }
@@ -95,7 +121,8 @@ const AdminMemberships = () => {
       }
 
       if (editingMembership) {
-        await updateMembership(editingMembership.id, data)
+        const { userId: _uid, ...updatePayload } = data
+        await updateMembership(editingMembership.id, updatePayload)
         await loadMemberships()
         alert('회원권이 수정되었습니다.')
       } else {
@@ -133,6 +160,12 @@ const AdminMemberships = () => {
             onClick={() => navigate('/admin/users')}
           >
             회원 관리
+          </button>
+          <button
+            className={`nav-btn ${location.pathname === '/admin/membership-types' ? 'active' : ''}`}
+            onClick={() => navigate('/admin/membership-types')}
+          >
+            회원권 종류
           </button>
           <button
             className={`nav-btn ${location.pathname === '/admin/memberships' ? 'active' : ''}`}
@@ -229,9 +262,13 @@ const AdminMemberships = () => {
           <MembershipFormModal
             membership={editingMembership}
             users={users}
+            membershipTypes={membershipTypes}
+            presetUserId={presetUserId}
+            onPresetConsumed={() => setPresetUserId(null)}
             onClose={() => {
               setShowFormModal(false)
               setEditingMembership(null)
+              setPresetUserId(null)
             }}
             onSave={handleSaveMembership}
           />
