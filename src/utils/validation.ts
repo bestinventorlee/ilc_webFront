@@ -31,6 +31,14 @@ export const validatePassword = (password: string): boolean => {
 }
 
 /**
+ * 회원 아이디(Username) 검증
+ * 4~20자, 영문/숫자/언더스코어
+ */
+export const validateUsername = (username: string): boolean => {
+  return /^[a-zA-Z0-9_]{4,20}$/.test(username)
+}
+
+/**
  * 회원가입 폼 전체 유효성 검사
  */
 export const validateSignUpForm = (data: SignUpData): ValidationResult => {
@@ -44,8 +52,16 @@ export const validateSignUpForm = (data: SignUpData): ValidationResult => {
     })
   }
 
-  // 이메일 검증
-  if (!data.email || !validateEmail(data.email)) {
+  // 회원 아이디 검증
+  if (!data.username || !validateUsername(data.username)) {
+    errors.push({
+      field: 'username',
+      message: '아이디는 4~20자 영문, 숫자, 언더스코어(_)만 가능합니다.',
+    })
+  }
+
+  // 이메일 검증 (선택 입력)
+  if (data.email && !validateEmail(data.email)) {
     errors.push({
       field: 'email',
       message: '올바른 이메일 형식을 입력해주세요.',

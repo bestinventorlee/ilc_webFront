@@ -66,14 +66,26 @@ export const removeToken = (): void => {
 /**
  * 사용자 정보 저장
  */
-export const saveUser = (user: { userId: string; email: string; name: string; role?: 'admin' | 'user' }): void => {
+export const saveUser = (user: {
+  userId: string
+  username?: string
+  email: string
+  name: string
+  role?: 'admin' | 'user'
+}): void => {
   localStorage.setItem(USER_KEY, JSON.stringify(user))
 }
 
 /**
  * 사용자 정보 가져오기
  */
-export const getUser = (): { userId: string; email: string; name: string; role?: 'admin' | 'user' } | null => {
+export const getUser = (): {
+  userId: string
+  username?: string
+  email: string
+  name: string
+  role?: 'admin' | 'user'
+} | null => {
   const userStr = localStorage.getItem(USER_KEY)
   if (!userStr) return null
   try {

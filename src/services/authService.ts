@@ -1,4 +1,13 @@
-import { SignUpData, SignUpResponse, LoginData, LoginResponse, RefreshTokenResponse } from '../types/auth'
+import {
+  SignUpData,
+  SignUpResponse,
+  LoginData,
+  LoginResponse,
+  RefreshTokenResponse,
+  UsernameCheckResponse,
+  FindUsernameData,
+  FindUsernameResponse,
+} from '../types/auth'
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
 
@@ -14,7 +23,8 @@ export const signUp = async (data: SignUpData): Promise<SignUpResponse> => {
       },
       body: JSON.stringify({
         name: data.name,
-        email: data.email,
+        username: data.username,
+        email: data.email || undefined,
         password: data.password,
       }),
     })
@@ -39,6 +49,58 @@ export const signUp = async (data: SignUpData): Promise<SignUpResponse> => {
 }
 
 /**
+ * 회원 아이디 중복 확인
+ */
+export const checkUsernameAvailability = async (username: string): Promise<UsernameCheckResponse> => {
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/auth/check-username?username=${encodeURIComponent(username)}`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    )
+    const result = await response.json()
+    if (!response.ok) {
+      throw new Error(result.message || '아이디 중복 확인에 실패했습니다.')
+    }
+    return result
+  } catch (error) {
+    if (error instanceof Error) {
+      throw error
+    }
+    throw new Error('아이디 중복 확인 중 오류가 발생했습니다.')
+  }
+}
+
+/**
+ * 아이디 찾기
+ */
+export const findUsername = async (data: FindUsernameData): Promise<FindUsernameResponse> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/auth/find-username`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    })
+    const result = await response.json()
+    if (!response.ok) {
+      throw new Error(result.message || '아이디 찾기에 실패했습니다.')
+    }
+    return result
+  } catch (error) {
+    if (error instanceof Error) {
+      throw error
+    }
+    throw new Error('아이디 찾기 중 오류가 발생했습니다.')
+  }
+}
+
+/**
  * 로그인 API 호출
  */
 export const login = async (data: LoginData): Promise<LoginResponse> => {
@@ -49,7 +111,7 @@ export const login = async (data: LoginData): Promise<LoginResponse> => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        email: data.email,
+        loginId: data.loginId,
         password: data.password,
       }),
     })

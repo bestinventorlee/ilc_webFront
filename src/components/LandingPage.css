@@ -217,6 +217,44 @@
   text-decoration: underline;
 }
 
+.find-id-box {
+  border: 1px solid #e5e5e5;
+  border-radius: 10px;
+  padding: 0.875rem;
+  background: #fafafa;
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+.find-id-title {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #262626;
+}
+
+.find-id-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.find-id-btn {
+  border: 1px solid #d4d4d4;
+  background: #ffffff;
+  color: #171717;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border-radius: 8px;
+  padding: 0.5rem 0.875rem;
+  cursor: pointer;
+}
+
+.find-id-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .landing-page__submit {
   width: 100%;
   justify-content: center;

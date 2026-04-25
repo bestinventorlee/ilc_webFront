@@ -1,6 +1,7 @@
 export interface SignUpData {
   name: string
-  email: string
+  username: string
+  email?: string
   password: string
   confirmPassword: string
 }
@@ -10,7 +11,8 @@ export interface SignUpResponse {
   message: string
   data?: {
     userId: string
-    email: string
+    username: string
+    email?: string
     name: string
     role: 'admin' | 'user'
     accessToken: string // Access Token (15분 만료)
@@ -27,7 +29,7 @@ export interface RefreshTokenResponse {
 }
 
 export interface LoginData {
-  email: string
+  loginId: string
   password: string
 }
 
@@ -36,7 +38,8 @@ export interface LoginResponse {
   message: string
   data?: {
     userId: string
-    email: string
+    username: string
+    email?: string
     name: string
     role: 'admin' | 'user'
     accessToken: string // Access Token (15분 만료)
@@ -47,5 +50,26 @@ export interface LoginResponse {
 export interface SignUpError {
   field?: string
   message: string
+}
+
+export interface UsernameCheckResponse {
+  success: boolean
+  message: string
+  data?: {
+    available: boolean
+  }
+}
+
+export interface FindUsernameData {
+  name: string
+  email: string
+}
+
+export interface FindUsernameResponse {
+  success: boolean
+  message: string
+  data?: {
+    username: string
+  }
 }
 

@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams, Link, useLocation } from 'react-router-dom'
 import '../pages/ilc/ilc-site.css'
 import './LandingPage.css'
-import { signUp, login } from '../services/authService'
-import { validateSignUpForm, validateEmail } from '../utils/validation'
+import { signUp, login, checkUsernameAvailability, findUsername } from '../services/authService'
+import { validateSignUpForm, validateEmail, validateUsername } from '../utils/validation'
 import { saveTokens, saveUser, isAuthenticated } from '../utils/token'
 import ContactModal from './ContactModal'
 
@@ -31,10 +31,19 @@ const LandingPage = () => {
   const location = useLocation()
   const [searchParams] = useSearchParams()
   const [isLogin, setIsLogin] = useState(true)
+  const [loginId, setLoginId] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [name, setName] = useState('')
+  const [username, setUsername] = useState('')
+  const [isUsernameChecking, setIsUsernameChecking] = useState(false)
+  const [isUsernameChecked, setIsUsernameChecked] = useState(false)
+  const [usernameCheckMessage, setUsernameCheckMessage] = useState('')
+  const [showFindIdForm, setShowFindIdForm] = useState(false)
+  const [findName, setFindName] = useState('')
+  const [findEmail, setFindEmail] = useState('')
+  const [isFindingId, setIsFindingId] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [successMessage, setSuccessMessage] = useState('')
@@ -67,9 +76,16 @@ const LandingPage = () => {
   // 폼 초기화
   const resetForm = () => {
     setEmail('')
+    setLoginId('')
     setPassword('')
     setConfirmPassword('')
     setName('')
+    setUsername('')
+    setIsUsernameChecked(false)
+    setUsernameCheckMessage('')
+    setShowFindIdForm(false)
+    setFindName('')
+    setFindEmail('')
     setErrors({})
     setGeneralError('')
     setSuccessMessage('')
@@ -81,6 +97,75 @@ const LandingPage = () => {
     resetForm()
   }
 
+  const handleUsernameCheck = async () => {
+    const trimmed = username.trim()
+    if (!validateUsername(trimmed)) {
+      setErrors((prev) => ({
+        ...prev,
+        username: '아이디는 4~20자 영문, 숫자, 언더스코어(_)만 가능합니다.',
+      }))
+      setIsUsernameChecked(false)
+      setUsernameCheckMessage('')
+      return
+    }
+
+    setIsUsernameChecking(true)
+    try {
+      const result = await checkUsernameAvailability(trimmed)
+      if (result.data?.available) {
+        setIsUsernameChecked(true)
+        setUsernameCheckMessage('사용 가능한 아이디입니다.')
+        setErrors((prev) => {
+          const next = { ...prev }
+          delete next.username
+          return next
+        })
+      } else {
+        setIsUsernameChecked(false)
+        setUsernameCheckMessage('이미 사용 중인 아이디입니다.')
+        setErrors((prev) => ({
+          ...prev,
+          username: '이미 사용 중인 아이디입니다.',
+        }))
+      }
+    } catch (error) {
+      setIsUsernameChecked(false)
+      setUsernameCheckMessage('')
+      setErrors((prev) => ({
+        ...prev,
+        username: error instanceof Error ? error.message : '아이디 확인 중 오류가 발생했습니다.',
+      }))
+    } finally {
+      setIsUsernameChecking(false)
+    }
+  }
+
+  const handleFindUsername = async () => {
+    if (!findName.trim() || !findEmail.trim()) {
+      setGeneralError('아이디 찾기를 위해 이름과 이메일을 입력해주세요.')
+      return
+    }
+    try {
+      setIsFindingId(true)
+      const result = await findUsername({
+        name: findName.trim(),
+        email: findEmail.trim(),
+      })
+      if (result.data?.username) {
+        setGeneralError('')
+        setSuccessMessage(`회원 아이디는 "${result.data.username}" 입니다.`)
+        setShowFindIdForm(false)
+        setFindName('')
+        setFindEmail('')
+      }
+    } catch (error) {
+      setSuccessMessage('')
+      setGeneralError(error instanceof Error ? error.message : '아이디 찾기에 실패했습니다.')
+    } finally {
+      setIsFindingId(false)
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setErrors({})
@@ -90,17 +175,10 @@ const LandingPage = () => {
     if (isLogin) {
       // 로그인 로직
       // 입력 검증
-      if (!email || !password) {
+      if (!loginId || !password) {
         setErrors({
-          email: !email ? '이메일을 입력해주세요.' : '',
+          loginId: !loginId ? '아이디를 입력해주세요.' : '',
           password: !password ? '비밀번호를 입력해주세요.' : '',
-        })
-        return
-      }
-
-      if (!validateEmail(email)) {
-        setErrors({
-          email: '올바른 이메일 형식을 입력해주세요.',
         })
         return
       }
@@ -109,7 +187,7 @@ const LandingPage = () => {
 
       try {
         // 로그인 API 호출
-        const response = await login({ email: email.trim(), password })
+        const response = await login({ loginId: loginId.trim(), password })
 
         if (response.success && response.data) {
           // 토큰 및 사용자 정보 저장
@@ -118,7 +196,8 @@ const LandingPage = () => {
           }
           saveUser({
             userId: response.data.userId,
-            email: response.data.email,
+            username: response.data.username,
+            email: response.data.email || '',
             name: response.data.name,
             role: response.data.role,
           })
@@ -145,7 +224,8 @@ const LandingPage = () => {
     // 회원가입 로직
     const formData = {
       name: name.trim(),
-      email: email.trim(),
+      username: username.trim(),
+      email: email.trim() || undefined,
       password,
       confirmPassword,
     }
@@ -163,6 +243,14 @@ const LandingPage = () => {
       return
     }
 
+    if (!isUsernameChecked) {
+      setErrors((prev) => ({
+        ...prev,
+        username: '아이디 중복확인을 완료해주세요.',
+      }))
+      return
+    }
+
     setIsLoading(true)
 
     try {
@@ -176,7 +264,8 @@ const LandingPage = () => {
         }
         saveUser({
           userId: response.data.userId,
-          email: response.data.email,
+          username: response.data.username,
+          email: response.data.email || '',
           name: response.data.name,
           role: response.data.role,
         })
@@ -424,7 +513,49 @@ const LandingPage = () => {
                   </div>
                 )}
 
-                <div className="form-group">
+                {!isLogin && (
+                  <div className="form-group">
+                    <label htmlFor="username">회원 아이디</label>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <input
+                        type="text"
+                        id="username"
+                        value={username}
+                        onChange={(e) => {
+                          setUsername(e.target.value)
+                          setIsUsernameChecked(false)
+                          setUsernameCheckMessage('')
+                          if (errors.username) {
+                            setErrors((prev) => {
+                              const next = { ...prev }
+                              delete next.username
+                              return next
+                            })
+                          }
+                        }}
+                        placeholder="아이디를 입력하세요 (4~20자)"
+                        required={!isLogin}
+                        className={errors.username ? 'error' : ''}
+                      />
+                      <button
+                        type="button"
+                        onClick={handleUsernameCheck}
+                        disabled={isUsernameChecking || !username.trim()}
+                      >
+                        {isUsernameChecking ? '확인 중...' : '중복확인'}
+                      </button>
+                    </div>
+                    {usernameCheckMessage && (
+                      <span className="password-hint">{usernameCheckMessage}</span>
+                    )}
+                    {errors.username && (
+                      <span className="error-message">{errors.username}</span>
+                    )}
+                  </div>
+                )}
+
+                {!isLogin && (
+                  <div className="form-group">
                   <label htmlFor="email">이메일</label>
                   <input
                     type="email"
@@ -440,14 +571,41 @@ const LandingPage = () => {
                         })
                       }
                     }}
-                    placeholder="이메일을 입력하세요"
-                    required
+                    placeholder="이메일을 입력하세요 (선택)"
                     className={errors.email ? 'error' : ''}
                   />
                   {errors.email && (
                     <span className="error-message">{errors.email}</span>
                   )}
-                </div>
+                  </div>
+                )}
+
+                {isLogin && (
+                  <div className="form-group">
+                    <label htmlFor="loginId">회원 아이디</label>
+                    <input
+                      type="text"
+                      id="loginId"
+                      value={loginId}
+                      onChange={(e) => {
+                        setLoginId(e.target.value)
+                        if (errors.loginId) {
+                          setErrors((prev) => {
+                            const next = { ...prev }
+                            delete next.loginId
+                            return next
+                          })
+                        }
+                      }}
+                      placeholder="회원 아이디를 입력하세요"
+                      required={isLogin}
+                      className={errors.loginId ? 'error' : ''}
+                    />
+                    {errors.loginId && (
+                      <span className="error-message">{errors.loginId}</span>
+                    )}
+                  </div>
+                )}
 
                 <div className="form-group">
                   <label htmlFor="password">비밀번호</label>
@@ -514,9 +672,49 @@ const LandingPage = () => {
                       <input type="checkbox" />
                       <span>로그인 상태 유지</span>
                     </label>
-                    <a href="#forgot" className="forgot-link">
-                      비밀번호 찾기
+                    <a
+                      href="#find-id"
+                      className="forgot-link"
+                      onClick={(e) => {
+                        e.preventDefault()
+                        setShowFindIdForm((prev) => !prev)
+                        setGeneralError('')
+                        setSuccessMessage('')
+                      }}
+                    >
+                      아이디 찾기
                     </a>
+                  </div>
+                )}
+
+                {isLogin && showFindIdForm && (
+                  <div className="find-id-box">
+                    <p className="find-id-title">아이디 찾기</p>
+                    <div className="form-group">
+                      <label htmlFor="findName">이름</label>
+                      <input
+                        id="findName"
+                        type="text"
+                        value={findName}
+                        onChange={(e) => setFindName(e.target.value)}
+                        placeholder="가입 시 입력한 이름"
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label htmlFor="findEmail">이메일</label>
+                      <input
+                        id="findEmail"
+                        type="email"
+                        value={findEmail}
+                        onChange={(e) => setFindEmail(e.target.value)}
+                        placeholder="가입 시 입력한 이메일"
+                      />
+                    </div>
+                    <div className="find-id-actions">
+                      <button type="button" className="find-id-btn" onClick={handleFindUsername} disabled={isFindingId}>
+                        {isFindingId ? '조회 중...' : '아이디 조회'}
+                      </button>
+                    </div>
                   </div>
                 )}
 

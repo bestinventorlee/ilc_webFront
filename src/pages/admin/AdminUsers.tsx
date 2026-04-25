@@ -141,6 +141,7 @@ const AdminUsers = () => {
               <thead>
                 <tr>
                   <th>이름</th>
+                  <th>아이디</th>
                   <th>이메일</th>
                   <th>역할</th>
                   <th>가입일</th>
@@ -151,7 +152,7 @@ const AdminUsers = () => {
               <tbody>
                 {filteredUsers.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="empty-message">
+                    <td colSpan={7} className="empty-message">
                       검색 결과가 없습니다.
                     </td>
                   </tr>
@@ -159,6 +160,7 @@ const AdminUsers = () => {
                   filteredUsers.map((user) => (
                     <tr key={user.id}>
                       <td>{user.name}</td>
+                      <td>{user.username || '-'}</td>
                       <td>{user.email}</td>
                       <td>
                         <span className={`role-badge ${user.role}`}>
