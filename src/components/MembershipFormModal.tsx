@@ -241,7 +241,7 @@ const MembershipFormModal = ({
                 <option value="">회원을 선택하세요</option>
                 {users.map((user) => (
                   <option key={user.id} value={user.id}>
-                    {user.name} ({user.email})
+                    {user.name} ({user.email}) - ID: {user.id}
                   </option>
                 ))}
               </select>

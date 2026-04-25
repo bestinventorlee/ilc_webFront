@@ -108,6 +108,34 @@ export const getAdminMemberships = async (): Promise<AdminMembership[]> => {
   }
 }
 
+export const getAdminMembershipsByUser = async (userId: string): Promise<AdminMembership[]> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/admin/users/${userId}/memberships`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeader(),
+      },
+    })
+
+    const result = await response.json()
+
+    if (!response.ok) {
+      throw new Error(result.message || '회원별 회원권 목록 조회에 실패했습니다.')
+    }
+
+    return result.data || []
+  } catch (error) {
+    if (error instanceof TypeError && error.message === 'Failed to fetch') {
+      throw new Error('서버에 연결할 수 없습니다.')
+    }
+    if (error instanceof Error) {
+      throw error
+    }
+    throw new Error('회원별 회원권 목록 조회 중 오류가 발생했습니다.')
+  }
+}
+
 export const getAdminMembershipTypes = async (): Promise<AdminMembershipType[]> => {
   try {
     const response = await fetch(`${API_BASE_URL}/admin/membership-types`, {
@@ -135,6 +163,7 @@ export const getAdminMembershipTypes = async (): Promise<AdminMembershipType[]> 
 
 export const createMembershipType = async (data: {
   name: string
+  membershipNumberFormat: string
   defaultDurationDays?: number | null
   benefits: string[]
   price?: number | null
@@ -159,6 +188,7 @@ export const updateMembershipType = async (
   id: string,
   data: {
     name: string
+    membershipNumberFormat: string
     defaultDurationDays?: number | null
     benefits: string[]
     price?: number | null

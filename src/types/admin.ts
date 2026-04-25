@@ -25,6 +25,7 @@ export interface AdminMembership extends Membership {
 export interface AdminMembershipType {
   id: string
   name: string
+  membershipNumberFormat: string
   defaultDurationDays?: number
   benefits: string[]
   price?: number

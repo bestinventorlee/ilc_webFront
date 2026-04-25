@@ -12,6 +12,7 @@ import './AdminMemberships.css'
 
 const emptyForm = () => ({
   name: '',
+  membershipNumberFormat: 'MEM-{YYYY}-{SEQ3}',
   defaultDurationDays: '' as string | number,
   benefits: '',
   price: '',
@@ -55,6 +56,7 @@ const AdminMembershipTypes = () => {
     setEditing(row)
     setForm({
       name: row.name,
+      membershipNumberFormat: row.membershipNumberFormat,
       defaultDurationDays: row.defaultDurationDays ?? '',
       benefits: row.benefits.join('\n'),
       price: row.price != null ? String(row.price) : '',
@@ -73,6 +75,10 @@ const AdminMembershipTypes = () => {
     e.preventDefault()
     if (!form.name.trim()) {
       alert('종류 이름을 입력해주세요.')
+      return
+    }
+    if (!form.membershipNumberFormat.trim()) {
+      alert('회원권 번호 형식을 입력해주세요.')
       return
     }
     const benefits = parseBenefits()
@@ -102,6 +108,7 @@ const AdminMembershipTypes = () => {
       setSaving(true)
       const payload = {
         name: form.name.trim(),
+        membershipNumberFormat: form.membershipNumberFormat.trim(),
         defaultDurationDays,
         benefits,
         price,
@@ -214,6 +221,7 @@ const AdminMembershipTypes = () => {
               <thead>
                 <tr>
                   <th>이름</th>
+                  <th>번호 형식</th>
                   <th>기본 유효일수</th>
                   <th>가격(원)</th>
                   <th>혜택 요약</th>
@@ -224,6 +232,7 @@ const AdminMembershipTypes = () => {
                 {rows.map((r) => (
                   <tr key={r.id}>
                     <td>{r.name}</td>
+                    <td><code>{r.membershipNumberFormat}</code></td>
                     <td>{r.defaultDurationDays != null ? `${r.defaultDurationDays}일` : '-'}</td>
                     <td>{r.price != null ? r.price.toLocaleString() : '-'}</td>
                     <td>
@@ -270,6 +279,21 @@ const AdminMembershipTypes = () => {
                     disabled={saving}
                     placeholder="예: 프리미엄 12개월"
                   />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="mt-format">
+                    회원권 번호 형식 <span className="required">*</span>
+                  </label>
+                  <input
+                    id="mt-format"
+                    value={form.membershipNumberFormat}
+                    onChange={(e) => setForm((f) => ({ ...f, membershipNumberFormat: e.target.value }))}
+                    disabled={saving}
+                    placeholder="예: VIP-{YYYY}-{SEQ4}"
+                  />
+                  <p className="field-hint" style={{ marginTop: '0.25rem', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                    사용 가능 토큰: {'{YYYY}'}, {'{YY}'}, {'{MM}'}, {'{DD}'}, {'{SEQ}'}, {'{SEQ3}'}, {'{SEQ4}'}, {'{SEQ5}'}
+                  </p>
                 </div>
                 <div className="form-group">
                   <label htmlFor="mt-days">기본 유효일수 (선택)</label>
