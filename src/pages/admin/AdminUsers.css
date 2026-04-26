@@ -127,8 +127,11 @@
 }
 
 .action-group .action-btn-small {
-  min-width: 80px;
+  width: 84px;
   text-align: center;
+  justify-content: center;
+  display: inline-flex;
+  align-items: center;
 }
 
 .action-btn-small:hover {

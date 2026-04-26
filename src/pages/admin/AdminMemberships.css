@@ -131,8 +131,11 @@
   cursor: pointer;
   transition: all 0.2s;
   white-space: nowrap;
-  min-width: 80px;
+  width: 84px;
   text-align: center;
+  justify-content: center;
+  display: inline-flex;
+  align-items: center;
 }
 
 .action-btn-small.edit-btn {
