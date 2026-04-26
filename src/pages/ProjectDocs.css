@@ -35,6 +35,14 @@
   gap: 1.5rem;
 }
 
+.docs-empty {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1.5rem;
+  color: var(--text-secondary);
+}
+
 .doc-item {
   background: var(--bg-primary);
   padding: 2rem;

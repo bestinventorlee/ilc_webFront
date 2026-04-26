@@ -13,6 +13,24 @@
   border-bottom: 2px solid var(--border-color);
 }
 
+.admin-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.create-btn {
+  border: none;
+  border-radius: 8px;
+  background: var(--primary-color);
+  color: #fff;
+  font-weight: 600;
+  padding: 0.7rem 1rem;
+  cursor: pointer;
+}
+
 .nav-btn {
   padding: 0.75rem 1.5rem;
   border: 2px solid var(--border-color);
@@ -88,5 +106,80 @@
 
 .action-btn-small.library-delete-btn {
   background: #ff6b6b;
+}
+
+.library-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.library-modal {
+  width: min(820px, calc(100vw - 2rem));
+  background: var(--bg-primary);
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.library-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.library-form-grid label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.library-form-grid input,
+.library-form-grid textarea {
+  width: 100%;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 0.55rem 0.7rem;
+  background: var(--bg-secondary);
+}
+
+.library-form-description {
+  grid-column: 1 / -1;
+}
+
+.library-form-description textarea {
+  min-height: 110px;
+  resize: vertical;
+}
+
+.library-form-actions {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.cancel-btn,
+.save-btn {
+  border: none;
+  border-radius: 8px;
+  padding: 0.65rem 1rem;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.cancel-btn {
+  background: #e5e7eb;
+  color: #111827;
+}
+
+.save-btn {
+  background: var(--primary-color);
+  color: #fff;
 }
 

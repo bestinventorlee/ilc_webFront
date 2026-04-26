@@ -286,6 +286,73 @@ export const getAdminLibraryItems = async (): Promise<AdminLibraryItem[]> => {
   }
 }
 
+export const createLibraryItem = async (data: {
+  title: string
+  description: string
+  category: string
+  fileType: string
+  fileSize: number
+  downloadUrl?: string
+  author?: string
+  thumbnailUrl?: string
+}): Promise<AdminLibraryItem> => {
+  const response = await fetch(`${API_BASE_URL}/admin/library`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...getAuthHeader(),
+    },
+    body: JSON.stringify(data),
+  })
+  const result = await response.json()
+  if (!response.ok) {
+    throw new Error(result.message || '자료 등록에 실패했습니다.')
+  }
+  return result.data
+}
+
+export const updateLibraryItem = async (
+  id: string,
+  data: {
+    title: string
+    description: string
+    category: string
+    fileType: string
+    fileSize: number
+    downloadUrl?: string
+    author?: string
+    thumbnailUrl?: string
+  }
+): Promise<AdminLibraryItem> => {
+  const response = await fetch(`${API_BASE_URL}/admin/library/${id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      ...getAuthHeader(),
+    },
+    body: JSON.stringify(data),
+  })
+  const result = await response.json()
+  if (!response.ok) {
+    throw new Error(result.message || '자료 수정에 실패했습니다.')
+  }
+  return result.data
+}
+
+export const deleteLibraryItem = async (id: string): Promise<void> => {
+  const response = await fetch(`${API_BASE_URL}/admin/library/${id}`, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+      ...getAuthHeader(),
+    },
+  })
+  const result = await response.json()
+  if (!response.ok) {
+    throw new Error(result.message || '자료 삭제에 실패했습니다.')
+  }
+}
+
 /**
  * 문의하기 목록 조회
  */

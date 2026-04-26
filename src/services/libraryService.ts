@@ -87,21 +87,15 @@ export const downloadLibraryItem = async (itemId: string): Promise<void> => {
       },
     })
 
+    const result = await response.json()
     if (!response.ok) {
-      const result = await response.json()
       throw new Error(result.message || '다운로드에 실패했습니다.')
     }
-
-    // 파일 다운로드 처리
-    const blob = await response.blob()
-    const url = window.URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = response.headers.get('Content-Disposition')?.split('filename=')[1] || 'download'
-    document.body.appendChild(a)
-    a.click()
-    window.URL.revokeObjectURL(url)
-    document.body.removeChild(a)
+    const downloadUrl = result?.data?.downloadUrl as string | undefined
+    if (!downloadUrl) {
+      throw new Error('다운로드 URL이 없습니다.')
+    }
+    window.open(downloadUrl, '_blank', 'noopener,noreferrer')
   } catch (error) {
     if (error instanceof Error) {
       throw error

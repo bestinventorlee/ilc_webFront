@@ -31,105 +31,8 @@ const Library = () => {
     try {
       setIsLoading(true)
       setError(null)
-      
-      // API가 없을 경우를 대비해 더미 데이터 사용
-      // 실제 API가 준비되면 아래 주석을 해제하고 더미 데이터 부분을 제거하세요
-      // const data = await getLibraryItems()
-      // setLibraryItems(data)
-
-      // 더미 데이터 (API가 준비될 때까지 사용)
-      const dummyData: LibraryItem[] = [
-        {
-          id: '1',
-          title: 'ILC 프로젝트 백서',
-          description: '프로젝트의 비전, 목표, 기술 스택에 대한 상세한 문서입니다.',
-          category: '문서',
-          fileType: 'pdf',
-          fileSize: 2048000, // 2MB
-          uploadDate: '2024-01-15T10:00:00Z',
-          downloadCount: 1250,
-          author: '관리자',
-        },
-        {
-          id: '2',
-          title: '기술 문서',
-          description: '프로젝트의 기술적 세부사항과 아키텍처에 대한 문서입니다.',
-          category: '문서',
-          fileType: 'pdf',
-          fileSize: 1536000, // 1.5MB
-          uploadDate: '2024-01-10T09:30:00Z',
-          downloadCount: 890,
-          author: '개발팀',
-        },
-        {
-          id: '3',
-          title: '프로젝트 로드맵',
-          description: '향후 개발 계획과 마일스톤에 대한 로드맵입니다.',
-          category: '문서',
-          fileType: 'xlsx',
-          fileSize: 512000, // 500KB
-          uploadDate: '2024-01-05T14:20:00Z',
-          downloadCount: 456,
-          author: '기획팀',
-        },
-        {
-          id: '4',
-          title: '프로젝트 소개 영상',
-          description: 'ILC 프로젝트를 소개하는 홍보 영상입니다.',
-          category: '동영상',
-          fileType: 'mp4',
-          fileSize: 52428800, // 50MB
-          uploadDate: '2024-01-12T11:15:00Z',
-          downloadCount: 234,
-          author: '마케팅팀',
-        },
-        {
-          id: '5',
-          title: '프로젝트 로고 이미지',
-          description: 'ILC 프로젝트 로고 이미지 파일입니다.',
-          category: '이미지',
-          fileType: 'png',
-          fileSize: 1024000, // 1MB
-          uploadDate: '2024-01-08T16:45:00Z',
-          downloadCount: 567,
-          author: '디자인팀',
-        },
-        {
-          id: '6',
-          title: '회원 가이드',
-          description: '회원 가입 및 이용 가이드 문서입니다.',
-          category: '문서',
-          fileType: 'docx',
-          fileSize: 768000, // 750KB
-          uploadDate: '2024-01-20T13:30:00Z',
-          downloadCount: 345,
-          author: '운영팀',
-        },
-        {
-          id: '7',
-          title: 'API 문서',
-          description: 'ILC 프로젝트 API 사용 가이드입니다.',
-          category: '문서',
-          fileType: 'pdf',
-          fileSize: 1280000, // 1.25MB
-          uploadDate: '2024-01-18T10:00:00Z',
-          downloadCount: 678,
-          author: '개발팀',
-        },
-        {
-          id: '8',
-          title: '프로젝트 브로셔',
-          description: '프로젝트 홍보용 브로셔 PDF 파일입니다.',
-          category: '문서',
-          fileType: 'pdf',
-          fileSize: 3072000, // 3MB
-          uploadDate: '2024-01-14T15:20:00Z',
-          downloadCount: 123,
-          author: '마케팅팀',
-        },
-      ]
-
-      setLibraryItems(dummyData)
+      const data = await getLibraryItems()
+      setLibraryItems(data)
     } catch (err) {
       setError(err instanceof Error ? err.message : '자료 목록을 불러오는데 실패했습니다.')
       console.error('자료 목록 로드 오류:', err)
@@ -161,14 +64,7 @@ const Library = () => {
 
   const handleDownload = async (item: LibraryItem) => {
     try {
-      // API가 없을 경우를 대비해 더미 다운로드 처리
-      // 실제 API가 준비되면 아래 주석을 해제하고 더미 다운로드 부분을 제거하세요
-      // await downloadLibraryItem(item.id)
-      
-      // 더미 다운로드 처리
-      alert(`${item.title} 다운로드를 시작합니다.\n\n(실제 API가 준비되면 파일이 다운로드됩니다)`)
-      
-      // 다운로드 횟수 증가 (더미)
+      await downloadLibraryItem(item.id)
       setLibraryItems((prevItems) =>
         prevItems.map((i) =>
           i.id === item.id ? { ...i, downloadCount: i.downloadCount + 1 } : i
