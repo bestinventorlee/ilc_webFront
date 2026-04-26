@@ -182,7 +182,7 @@ const AdminUsers = () => {
                           </button>
                           <button
                             type="button"
-                            className="action-btn-small edit-btn btn-fixed"
+                            className="action-btn-small user-membership-btn btn-fixed"
                             onClick={() => navigate(`/admin/users/${user.id}/memberships`)}
                           >
                             회원권

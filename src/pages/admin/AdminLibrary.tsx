@@ -107,10 +107,10 @@ const AdminLibrary = () => {
                     <td>{new Date(item.uploadDate).toLocaleDateString('ko-KR')}</td>
                     <td>
                       <div className="action-buttons">
-                        <button className="action-btn-small btn-fixed">
+                        <button className="action-btn-small library-edit-btn btn-fixed">
                           수정
                         </button>
-                        <button className="action-btn-small delete btn-fixed">
+                        <button className="action-btn-small library-delete-btn btn-fixed">
                           삭제
                         </button>
                       </div>

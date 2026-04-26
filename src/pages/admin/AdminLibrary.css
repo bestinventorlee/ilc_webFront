@@ -82,7 +82,11 @@
   align-items: center;
 }
 
-.action-btn-small.delete {
+.action-btn-small.library-edit-btn {
+  background: var(--primary-color);
+}
+
+.action-btn-small.library-delete-btn {
   background: #ff6b6b;
 }
 

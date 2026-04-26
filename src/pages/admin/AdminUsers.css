@@ -139,6 +139,14 @@
   background: var(--primary-dark);
 }
 
+.action-btn-small.user-membership-btn {
+  background: var(--primary-color);
+}
+
+.action-btn-small.user-membership-btn:hover {
+  background: var(--primary-dark);
+}
+
 .loading-container,
 .error-container {
   display: flex;

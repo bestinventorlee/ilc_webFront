@@ -139,21 +139,21 @@
   align-items: center;
 }
 
-.action-btn-small.edit-btn {
+.action-btn-small.membership-edit-btn {
   background: var(--primary-color);
   color: white;
 }
 
-.action-btn-small.edit-btn:hover {
+.action-btn-small.membership-edit-btn:hover {
   background: var(--primary-dark);
 }
 
-.action-btn-small.delete-btn {
+.action-btn-small.membership-delete-btn {
   background: #ff6b6b;
   color: white;
 }
 
-.action-btn-small.delete-btn:hover {
+.action-btn-small.membership-delete-btn:hover {
   background: #ff5252;
 }
 
