@@ -106,8 +106,10 @@ const AdminLibrary = () => {
                     <td>{item.downloadCount}</td>
                     <td>{new Date(item.uploadDate).toLocaleDateString('ko-KR')}</td>
                     <td>
-                      <button className="action-btn-small">수정</button>
-                      <button className="action-btn-small delete">삭제</button>
+                      <div className="action-buttons">
+                        <button className="action-btn-small">수정</button>
+                        <button className="action-btn-small delete">삭제</button>
+                      </div>
                     </td>
                   </tr>
                 ))}

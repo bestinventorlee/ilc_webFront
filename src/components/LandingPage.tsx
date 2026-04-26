@@ -516,7 +516,7 @@ const LandingPage = () => {
                 {!isLogin && (
                   <div className="form-group">
                     <label htmlFor="username">회원 아이디</label>
-                    <div style={{ display: 'flex', gap: '8px' }}>
+                    <div className="username-check-row">
                       <input
                         type="text"
                         id="username"
@@ -539,6 +539,7 @@ const LandingPage = () => {
                       />
                       <button
                         type="button"
+                        className="username-check-btn"
                         onClick={handleUsernameCheck}
                         disabled={isUsernameChecking || !username.trim()}
                       >

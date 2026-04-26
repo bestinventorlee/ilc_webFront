@@ -172,7 +172,7 @@ const AdminUsers = () => {
                         {user.lastLoginAt ? formatDate(user.lastLoginAt) : '-'}
                       </td>
                       <td>
-                        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                        <div className="action-group">
                           <button
                             type="button"
                             className="action-btn-small"

@@ -64,12 +64,18 @@
 
 .action-btn-small {
   padding: 0.5rem 1rem;
-  margin-right: 0.5rem;
   background: var(--primary-color);
   color: white;
   border: none;
   border-radius: 6px;
   cursor: pointer;
+  min-width: 80px;
+  text-align: center;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
 }
 
 .action-btn-small.delete {

@@ -131,6 +131,8 @@
   cursor: pointer;
   transition: all 0.2s;
   white-space: nowrap;
+  min-width: 80px;
+  text-align: center;
 }
 
 .action-btn-small.edit-btn {

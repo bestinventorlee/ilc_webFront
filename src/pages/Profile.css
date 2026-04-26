@@ -109,6 +109,11 @@
   cursor: pointer;
   transition: all 0.2s;
   margin-top: 0.5rem;
+  min-width: 80px;
+  text-align: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .edit-btn:hover,
@@ -144,6 +149,8 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
+  min-width: 120px;
+  text-align: center;
 }
 
 .save-btn:hover {
@@ -162,6 +169,8 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
+  min-width: 120px;
+  text-align: center;
 }
 
 .cancel-btn:hover {
@@ -188,6 +197,8 @@
   cursor: pointer;
   transition: all 0.2s;
   margin-top: 0.5rem;
+  min-width: 120px;
+  text-align: center;
 }
 
 .logout-btn:hover:not(:disabled) {

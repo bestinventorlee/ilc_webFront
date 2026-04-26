@@ -120,6 +120,17 @@
   transition: all 0.2s;
 }
 
+.action-group {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.action-group .action-btn-small {
+  min-width: 80px;
+  text-align: center;
+}
+
 .action-btn-small:hover {
   background: var(--primary-dark);
 }
