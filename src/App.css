@@ -16,5 +16,9 @@
   font-size: 0.875rem !important;
   font-weight: 600 !important;
   padding: 0 !important;
+  margin: 0 !important;
+  vertical-align: middle !important;
+  position: relative !important;
+  top: 0 !important;
 }
 
