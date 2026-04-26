@@ -183,7 +183,7 @@ const AdminUsers = () => {
                           <button
                             type="button"
                             className="action-btn-small edit-btn"
-                            onClick={() => navigate(`/admin/memberships?userId=${user.id}`)}
+                            onClick={() => navigate(`/admin/users/${user.id}/memberships`)}
                           >
                             회원권
                           </button>
@@ -202,7 +202,7 @@ const AdminUsers = () => {
             user={selectedUser}
             onClose={() => setSelectedUser(null)}
             onRegisterMembership={() => {
-              navigate(`/admin/memberships?userId=${selectedUser.id}`)
+              navigate(`/admin/users/${selectedUser.id}/memberships`)
               setSelectedUser(null)
             }}
           />

@@ -1,103 +1,83 @@
-import { useEffect, useState } from 'react'
-import { useNavigate, useLocation, useSearchParams } from 'react-router-dom'
+import { useEffect, useMemo, useState } from 'react'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import Header from '../../components/Header'
 import MembershipFormModal from '../../components/MembershipFormModal'
 import {
-  getAdminMemberships,
-  getAdminMembershipTypes,
-  getUsers,
   createMembership,
-  updateMembership,
   deleteMembership,
+  getAdminMembershipTypes,
+  getAdminMembershipsByUser,
+  getUsers,
+  updateMembership,
 } from '../../services/adminService'
 import type { AdminMembership, AdminMembershipType, AdminUser } from '../../types/admin'
 import './AdminMemberships.css'
 
-const AdminMemberships = () => {
+const AdminUserMemberships = () => {
   const navigate = useNavigate()
   const location = useLocation()
-  const [searchParams, setSearchParams] = useSearchParams()
-  const [memberships, setMemberships] = useState<AdminMembership[]>([])
+  const { userId } = useParams<{ userId: string }>()
+
   const [users, setUsers] = useState<AdminUser[]>([])
+  const [memberships, setMemberships] = useState<AdminMembership[]>([])
   const [membershipTypes, setMembershipTypes] = useState<AdminMembershipType[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [showFormModal, setShowFormModal] = useState(false)
   const [editingMembership, setEditingMembership] = useState<AdminMembership | null>(null)
-  const [presetUserId, setPresetUserId] = useState<string | null>(null)
+
+  const selectedUser = useMemo(() => users.find((u) => u.id === userId), [users, userId])
 
   useEffect(() => {
-    loadData()
-  }, [])
-
-  useEffect(() => {
-    const p = searchParams.get('presetUser')
-    if (!p) return
-    setPresetUserId(p)
-    setEditingMembership(null)
-    setShowFormModal(true)
-    const next = new URLSearchParams(searchParams)
-    next.delete('presetUser')
-    setSearchParams(next, { replace: true })
-  }, [searchParams, setSearchParams])
-
-  const loadData = async () => {
-    try {
-      setIsLoading(true)
-      await Promise.all([loadMemberships(), loadUsers(), loadMembershipTypes()])
-    } finally {
+    if (!userId) {
+      setError('잘못된 접근입니다.')
       setIsLoading(false)
+      return
     }
-  }
 
-  const loadMemberships = async () => {
-    try {
-      const membershipsData = await getAdminMemberships()
-      setMemberships(membershipsData)
-    } catch (err) {
-      console.error('회원권 로드 오류:', err)
+    const load = async () => {
+      try {
+        setIsLoading(true)
+        setError(null)
+        const [usersData, membershipsData, typesData] = await Promise.all([
+          getUsers(),
+          getAdminMembershipsByUser(userId),
+          getAdminMembershipTypes(),
+        ])
+        setUsers(usersData)
+        setMemberships(membershipsData)
+        setMembershipTypes(typesData)
+      } catch (err) {
+        setError(err instanceof Error ? err.message : '회원권 정보를 불러오지 못했습니다.')
+      } finally {
+        setIsLoading(false)
+      }
     }
-  }
 
-  const loadUsers = async (): Promise<AdminUser[]> => {
-    try {
-      const usersData = await getUsers()
-      setUsers(usersData)
-      return usersData
-    } catch (err) {
-      console.error('회원 로드 오류:', err)
-      return []
-    }
-  }
+    load()
+  }, [userId])
 
-  const loadMembershipTypes = async () => {
-    try {
-      const types = await getAdminMembershipTypes()
-      setMembershipTypes(types)
-    } catch (err) {
-      console.error('회원권 종류 로드 오류:', err)
-    }
+  const reloadMemberships = async () => {
+    if (!userId) return
+    const data = await getAdminMembershipsByUser(userId)
+    setMemberships(data)
   }
 
   const handleCreateMembership = () => {
     setEditingMembership(null)
-    setPresetUserId(null)
     setShowFormModal(true)
   }
 
   const handleEditMembership = (membership: AdminMembership) => {
-    setPresetUserId(null)
     setEditingMembership(membership)
     setShowFormModal(true)
   }
 
   const handleDeleteMembership = async (membershipId: string) => {
-    if (!confirm('정말 삭제하시겠습니까?')) {
-      return
-    }
-
+    if (!confirm('정말 삭제하시겠습니까?')) return
     try {
       await deleteMembership(membershipId)
-      await loadMemberships()
+      await reloadMemberships()
       alert('회원권이 삭제되었습니다.')
     } catch (err) {
       console.error('회원권 삭제 오류:', err)
@@ -116,22 +96,15 @@ const AdminMemberships = () => {
     status: 'active' | 'expired' | 'suspended'
   }) => {
     try {
-      const selectedUser = users.find((u) => u.id === data.userId)
-      if (!selectedUser) {
-        alert('회원을 찾을 수 없습니다.')
-        return
-      }
-
       if (editingMembership) {
         const { userId: _uid, ...updatePayload } = data
         await updateMembership(editingMembership.id, updatePayload)
-        await loadMemberships()
         alert('회원권이 수정되었습니다.')
       } else {
         await createMembership(data)
-        await loadMemberships()
         alert('회원권이 등록되었습니다.')
       }
+      await reloadMemberships()
       setShowFormModal(false)
       setEditingMembership(null)
     } catch (err) {
@@ -145,11 +118,14 @@ const AdminMemberships = () => {
       <Header />
       <div className="container">
         <div className="admin-header">
-          <h1>회원권 관리</h1>
-          <p className="admin-subtitle">전체 회원권 현황을 확인하고 관리하세요</p>
+          <h1>회원별 회원권 관리</h1>
+          <p className="admin-subtitle">
+            {selectedUser
+              ? `${selectedUser.name} (${selectedUser.username || '-'}) 회원의 회원권을 관리하세요`
+              : '선택한 회원의 회원권을 관리하세요'}
+          </p>
         </div>
 
-        {/* 관리자 네비게이션 */}
         <div className="admin-nav">
           <button
             className={`nav-btn ${location.pathname === '/admin' ? 'active' : ''}`}
@@ -158,45 +134,24 @@ const AdminMemberships = () => {
             대시보드
           </button>
           <button
-            className={`nav-btn ${location.pathname === '/admin/users' ? 'active' : ''}`}
+            className={`nav-btn ${location.pathname.startsWith('/admin/users') ? 'active' : ''}`}
             onClick={() => navigate('/admin/users')}
           >
             회원 관리
           </button>
-          <button
-            className={`nav-btn ${location.pathname === '/admin/membership-types' ? 'active' : ''}`}
-            onClick={() => navigate('/admin/membership-types')}
-          >
+          <button className="nav-btn" onClick={() => navigate('/admin/membership-types')}>
             회원권 종류
           </button>
-          <button
-            className={`nav-btn ${location.pathname === '/admin/memberships' ? 'active' : ''}`}
-            onClick={() => navigate('/admin/memberships')}
-          >
+          <button className="nav-btn" onClick={() => navigate('/admin/memberships')}>
             회원권 관리
-          </button>
-          <button
-            className={`nav-btn ${location.pathname === '/admin/posts' ? 'active' : ''}`}
-            onClick={() => navigate('/admin/posts')}
-          >
-            커뮤니티 관리
-          </button>
-          <button
-            className={`nav-btn ${location.pathname === '/admin/library' ? 'active' : ''}`}
-            onClick={() => navigate('/admin/library')}
-          >
-            자료실 관리
-          </button>
-          <button
-            className={`nav-btn ${location.pathname === '/admin/contacts' ? 'active' : ''}`}
-            onClick={() => navigate('/admin/contacts')}
-          >
-            문의하기 관리
           </button>
         </div>
 
-        <div className="admin-controls">
-          <button className="create-btn" onClick={handleCreateMembership}>
+        <div className="admin-controls" style={{ justifyContent: 'space-between' }}>
+          <button className="action-btn-small" onClick={() => navigate('/admin/users')}>
+            회원관리로 돌아가기
+          </button>
+          <button className="create-btn" onClick={handleCreateMembership} disabled={!selectedUser}>
             + 회원권 등록
           </button>
         </div>
@@ -205,6 +160,14 @@ const AdminMemberships = () => {
           <div className="loading-container">
             <div className="loading-spinner"></div>
             <p>회원권 목록을 불러오는 중...</p>
+          </div>
+        ) : error ? (
+          <div className="empty-container">
+            <p>{error}</p>
+          </div>
+        ) : !selectedUser ? (
+          <div className="empty-container">
+            <p>선택한 회원 정보를 찾을 수 없습니다.</p>
           </div>
         ) : memberships.length === 0 ? (
           <div className="empty-container">
@@ -215,9 +178,6 @@ const AdminMemberships = () => {
             <table className="admin-table">
               <thead>
                 <tr>
-                  <th>회원</th>
-                  <th>회원 ID</th>
-                  <th>이메일</th>
                   <th>회원권 종류</th>
                   <th>회원권번호</th>
                   <th>상태</th>
@@ -229,9 +189,6 @@ const AdminMemberships = () => {
               <tbody>
                 {memberships.map((m) => (
                   <tr key={m.id}>
-                    <td>{m.userName}</td>
-                    <td>{m.userId}</td>
-                    <td>{m.userEmail}</td>
                     <td>{m.membershipType}</td>
                     <td>{m.membershipNumber}</td>
                     <td>
@@ -264,16 +221,15 @@ const AdminMemberships = () => {
           </div>
         )}
 
-        {showFormModal && (
+        {showFormModal && selectedUser && (
           <MembershipFormModal
             membership={editingMembership}
             users={users}
             membershipTypes={membershipTypes}
-            presetUserId={presetUserId}
+            presetUserId={selectedUser.id}
             onClose={() => {
               setShowFormModal(false)
               setEditingMembership(null)
-              setPresetUserId(null)
             }}
             onSave={handleSaveMembership}
           />
@@ -283,5 +239,4 @@ const AdminMemberships = () => {
   )
 }
 
-export default AdminMemberships
-
+export default AdminUserMemberships
