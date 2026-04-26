@@ -241,10 +241,18 @@ const AdminMembershipTypes = () => {
                     </td>
                     <td>
                       <div className="action-buttons">
-                        <button type="button" className="action-btn-small edit-btn" onClick={() => openEdit(r)}>
+                        <button
+                          type="button"
+                          className="action-btn-small membership-type-edit-btn btn-fixed"
+                          onClick={() => openEdit(r)}
+                        >
                           수정
                         </button>
-                        <button type="button" className="action-btn-small delete-btn" onClick={() => handleDelete(r)}>
+                        <button
+                          type="button"
+                          className="action-btn-small membership-type-delete-btn btn-fixed"
+                          onClick={() => handleDelete(r)}
+                        >
                           삭제
                         </button>
                       </div>

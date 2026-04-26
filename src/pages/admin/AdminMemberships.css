@@ -157,6 +157,24 @@
   background: #ff5252;
 }
 
+.action-btn-small.membership-type-edit-btn {
+  background: var(--primary-color);
+  color: white;
+}
+
+.action-btn-small.membership-type-edit-btn:hover {
+  background: var(--primary-dark);
+}
+
+.action-btn-small.membership-type-delete-btn {
+  background: #ff6b6b;
+  color: white;
+}
+
+.action-btn-small.membership-type-delete-btn:hover {
+  background: #ff5252;
+}
+
 .loading-container,
 .empty-container {
   display: flex;

@@ -205,13 +205,13 @@ const AdminPosts = () => {
                 {post.type === 'notice' && (
                   <div className="post-actions-container">
                     <button
-                      className="action-btn edit-btn"
+                      className="action-btn posts-edit-btn btn-fixed"
                       onClick={() => handleEditPost(post)}
                     >
                       수정
                     </button>
                     <button
-                      className="action-btn delete-btn"
+                      className="action-btn posts-delete-btn btn-fixed"
                       onClick={() => handleDeletePost(post.id)}
                     >
                       삭제
