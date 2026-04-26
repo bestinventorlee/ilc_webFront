@@ -17,6 +17,8 @@ interface MembershipFormModalProps {
   membershipTypes: AdminMembershipType[]
   presetUserId?: string | null
   onPresetConsumed?: () => void
+  lockUserSelection?: boolean
+  lockTemplateFields?: boolean
   onClose: () => void
   onSave: (data: {
     userId: string
@@ -36,6 +38,8 @@ const MembershipFormModal = ({
   membershipTypes,
   presetUserId,
   onPresetConsumed,
+  lockUserSelection = false,
+  lockTemplateFields = false,
   onClose,
   onSave,
 }: MembershipFormModalProps) => {
@@ -47,6 +51,7 @@ const MembershipFormModal = ({
   const [benefits, setBenefits] = useState(membership?.benefits.join('\n') || '')
   const [price, setPrice] = useState(membership?.price?.toString() || '')
   const [description, setDescription] = useState(membership?.description || '')
+  const [note, setNote] = useState(membership?.description || '')
   const [status, setStatus] = useState<'active' | 'expired' | 'suspended'>(membership?.status || 'active')
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [isLoading, setIsLoading] = useState(false)
@@ -56,12 +61,14 @@ const MembershipFormModal = ({
       setMembershipType(type.name)
       setBenefits(type.benefits.join('\n'))
       setPrice(type.price != null ? String(type.price) : '')
-      setDescription(type.description ?? '')
+      if (!lockTemplateFields) {
+        setDescription(type.description ?? '')
+      }
       if (type.defaultDurationDays != null && join) {
         setExpiryDate(addDaysFromJoinDate(join, type.defaultDurationDays))
       }
     },
-    []
+    [lockTemplateFields]
   )
 
   useEffect(() => {
@@ -146,7 +153,7 @@ const MembershipFormModal = ({
       expiryDate: expiryDate || undefined,
       benefits: benefitsArray,
       price: price ? parseInt(price, 10) : undefined,
-      description: description.trim() || undefined,
+      description: (lockTemplateFields ? note : description).trim() || undefined,
       status,
     })
     setIsLoading(false)
@@ -169,7 +176,9 @@ const MembershipFormModal = ({
         setMembershipType(membership.membershipType)
         setBenefits(membership.benefits.join('\n'))
         setPrice(membership.price?.toString() ?? '')
-        setDescription(membership.description ?? '')
+        if (!lockTemplateFields) {
+          setDescription(membership.description ?? '')
+        }
         setExpiryDate(membership.expiryDate ?? '')
       }
       return
@@ -193,6 +202,7 @@ const MembershipFormModal = ({
     else if (field === 'benefits') setBenefits(value)
     else if (field === 'price') setPrice(value)
     else if (field === 'description') setDescription(value)
+    else if (field === 'note') setNote(value)
     else if (field === 'status') setStatus(value as 'active' | 'expired' | 'suspended')
 
     if (errors[field]) {
@@ -208,6 +218,10 @@ const MembershipFormModal = ({
     membership && !membershipTypes.some((t) => t.name === membership.membershipType) ? (
       <option value="__orphan__">{membership.membershipType} (카탈로그에 없음)</option>
     ) : null
+  const selectedType =
+    selectedTypeId && selectedTypeId !== '__orphan__'
+      ? membershipTypes.find((t) => t.id === selectedTypeId)
+      : null
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -235,13 +249,13 @@ const MembershipFormModal = ({
                 id="userId"
                 value={userId}
                 onChange={(e) => handleChange('userId', e.target.value)}
-                disabled={isLoading || !!membership}
+                disabled={isLoading || !!membership || lockUserSelection}
                 className={errors.userId ? 'error' : ''}
               >
                 <option value="">회원을 선택하세요</option>
                 {users.map((user) => (
                   <option key={user.id} value={user.id}>
-                    {user.name} ({user.email}) - ID: {user.id}
+                    {user.name} ({user.username || user.email || '이메일 없음'})
                   </option>
                 ))}
               </select>
@@ -312,7 +326,7 @@ const MembershipFormModal = ({
                   id="price"
                   value={price}
                   onChange={(e) => handleChange('price', e.target.value)}
-                  disabled={isLoading}
+                  disabled={isLoading || lockTemplateFields}
                   placeholder="예: 99000"
                   min="0"
                 />
@@ -341,7 +355,7 @@ const MembershipFormModal = ({
                 id="benefits"
                 value={benefits}
                 onChange={(e) => handleChange('benefits', e.target.value)}
-                disabled={isLoading}
+                disabled={isLoading || lockTemplateFields}
                 className={errors.benefits ? 'error' : ''}
                 placeholder="각 혜택을 줄바꿈으로 구분하세요&#10;예:&#10;무제한 문서 다운로드&#10;프리미엄 커뮤니티"
                 rows={4}
@@ -349,17 +363,43 @@ const MembershipFormModal = ({
               {errors.benefits && <span className="field-error">{errors.benefits}</span>}
             </div>
 
-            <div className="form-group">
-              <label htmlFor="description">설명</label>
-              <textarea
-                id="description"
-                value={description}
-                onChange={(e) => handleChange('description', e.target.value)}
-                disabled={isLoading}
-                placeholder="회원권에 대한 추가 설명을 입력하세요"
-                rows={3}
-              />
-            </div>
+            {lockTemplateFields ? (
+              <>
+                <div className="form-group">
+                  <label htmlFor="templateDescription">설명 (회원권 종류 기본 내용)</label>
+                  <textarea
+                    id="templateDescription"
+                    value={selectedType?.description ?? ''}
+                    disabled
+                    placeholder="선택한 회원권 종류의 설명이 표시됩니다."
+                    rows={3}
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="note">비고 (개별회원 특이사항)</label>
+                  <textarea
+                    id="note"
+                    value={note}
+                    onChange={(e) => handleChange('note', e.target.value)}
+                    disabled={isLoading}
+                    placeholder="해당 회원에게만 적용되는 특이사항을 입력하세요"
+                    rows={3}
+                  />
+                </div>
+              </>
+            ) : (
+              <div className="form-group">
+                <label htmlFor="description">설명</label>
+                <textarea
+                  id="description"
+                  value={description}
+                  onChange={(e) => handleChange('description', e.target.value)}
+                  disabled={isLoading}
+                  placeholder="회원권에 대한 추가 설명을 입력하세요"
+                  rows={3}
+                />
+              </div>
+            )}
           </div>
 
           <div className="modal-footer membership-form-footer">

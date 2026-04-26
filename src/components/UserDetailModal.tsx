@@ -125,8 +125,8 @@ const UserDetailModal = ({ user, onClose, onRegisterMembership }: UserDetailModa
                 </span>
               </div>
               <div className="detail-row">
-                <span className="detail-label">회원 ID</span>
-                <span className="detail-value">{user.id}</span>
+                <span className="detail-label">아이디</span>
+                <span className="detail-value">{user.username || '-'}</span>
               </div>
             </div>
           ) : isMembershipLoading ? (

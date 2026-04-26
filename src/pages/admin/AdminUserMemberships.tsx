@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useLocation, useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import Header from '../../components/Header'
 import MembershipFormModal from '../../components/MembershipFormModal'
 import {
@@ -15,7 +15,6 @@ import './AdminMemberships.css'
 
 const AdminUserMemberships = () => {
   const navigate = useNavigate()
-  const location = useLocation()
   const { userId } = useParams<{ userId: string }>()
 
   const [users, setUsers] = useState<AdminUser[]>([])
@@ -126,27 +125,6 @@ const AdminUserMemberships = () => {
           </p>
         </div>
 
-        <div className="admin-nav">
-          <button
-            className={`nav-btn ${location.pathname === '/admin' ? 'active' : ''}`}
-            onClick={() => navigate('/admin')}
-          >
-            대시보드
-          </button>
-          <button
-            className={`nav-btn ${location.pathname.startsWith('/admin/users') ? 'active' : ''}`}
-            onClick={() => navigate('/admin/users')}
-          >
-            회원 관리
-          </button>
-          <button className="nav-btn" onClick={() => navigate('/admin/membership-types')}>
-            회원권 종류
-          </button>
-          <button className="nav-btn" onClick={() => navigate('/admin/memberships')}>
-            회원권 관리
-          </button>
-        </div>
-
         <div className="admin-controls" style={{ justifyContent: 'space-between' }}>
           <button className="action-btn-small" onClick={() => navigate('/admin/users')}>
             회원관리로 돌아가기
@@ -227,6 +205,8 @@ const AdminUserMemberships = () => {
             users={users}
             membershipTypes={membershipTypes}
             presetUserId={selectedUser.id}
+            lockUserSelection
+            lockTemplateFields
             onClose={() => {
               setShowFormModal(false)
               setEditingMembership(null)

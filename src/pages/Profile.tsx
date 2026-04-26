@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Header from '../components/Header'
-import { getUser, getAccessToken, getRefreshToken, removeTokens } from '../utils/token'
+import { getUser, getRefreshToken, removeTokens } from '../utils/token'
 import { logout } from '../services/authService'
 import './Profile.css'
 
@@ -94,8 +94,8 @@ const Profile = () => {
                 <span className="info-note">이메일은 변경할 수 없습니다</span>
               </div>
               <div className="info-item">
-                <label>사용자 ID</label>
-                <p>{user?.userId}</p>
+                <label>아이디</label>
+                <p>{user?.username || '-'}</p>
               </div>
             </div>
           </div>

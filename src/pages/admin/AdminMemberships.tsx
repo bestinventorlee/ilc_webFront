@@ -216,7 +216,6 @@ const AdminMemberships = () => {
               <thead>
                 <tr>
                   <th>회원</th>
-                  <th>회원 ID</th>
                   <th>이메일</th>
                   <th>회원권 종류</th>
                   <th>회원권번호</th>
@@ -230,7 +229,6 @@ const AdminMemberships = () => {
                 {memberships.map((m) => (
                   <tr key={m.id}>
                     <td>{m.userName}</td>
-                    <td>{m.userId}</td>
                     <td>{m.userEmail}</td>
                     <td>{m.membershipType}</td>
                     <td>{m.membershipNumber}</td>
