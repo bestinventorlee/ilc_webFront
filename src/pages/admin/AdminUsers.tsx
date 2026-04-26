@@ -175,16 +175,14 @@ const AdminUsers = () => {
                         <div className="action-group">
                           <button
                             type="button"
-                            className="action-btn-small"
-                            style={{ width: '84px' }}
+                            className="action-btn-small btn-fixed"
                             onClick={() => setSelectedUser(user)}
                           >
                             상세
                           </button>
                           <button
                             type="button"
-                            className="action-btn-small edit-btn"
-                            style={{ width: '84px' }}
+                            className="action-btn-small edit-btn btn-fixed"
                             onClick={() => navigate(`/admin/users/${user.id}/memberships`)}
                           >
                             회원권

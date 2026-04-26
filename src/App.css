@@ -2,3 +2,19 @@
   min-height: 100vh;
 }
 
+/* Global fixed-size action button to prevent per-page style drift */
+.btn-fixed {
+  width: 84px !important;
+  height: 40px !important;
+  box-sizing: border-box !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  white-space: nowrap !important;
+  line-height: 1 !important;
+  font-size: 0.875rem !important;
+  font-weight: 600 !important;
+  padding: 0 !important;
+}
+

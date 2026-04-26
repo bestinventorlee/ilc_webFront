@@ -242,15 +242,13 @@ const AdminMemberships = () => {
                     <td>
                       <div className="action-buttons">
                         <button
-                          className="action-btn-small edit-btn"
-                          style={{ width: '84px' }}
+                          className="action-btn-small edit-btn btn-fixed"
                           onClick={() => handleEditMembership(m)}
                         >
                           수정
                         </button>
                         <button
-                          className="action-btn-small delete-btn"
-                          style={{ width: '84px' }}
+                          className="action-btn-small delete-btn btn-fixed"
                           onClick={() => handleDeleteMembership(m.id)}
                         >
                           삭제
