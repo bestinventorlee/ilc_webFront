@@ -4,6 +4,7 @@ import Header from '../../components/Header'
 import MembershipFormModal from '../../components/MembershipFormModal'
 import {
   getAdminMemberships,
+  getAdminMembershipsByUser,
   getAdminMembershipTypes,
   getUsers,
   createMembership,
@@ -24,10 +25,12 @@ const AdminMemberships = () => {
   const [showFormModal, setShowFormModal] = useState(false)
   const [editingMembership, setEditingMembership] = useState<AdminMembership | null>(null)
   const [presetUserId, setPresetUserId] = useState<string | null>(null)
+  const selectedUserId = searchParams.get('userId')
+  const selectedUser = selectedUserId ? users.find((u) => u.id === selectedUserId) : null
 
   useEffect(() => {
     loadData()
-  }, [])
+  }, [selectedUserId])
 
   useEffect(() => {
     const p = searchParams.get('presetUser')
@@ -43,27 +46,35 @@ const AdminMemberships = () => {
   const loadData = async () => {
     try {
       setIsLoading(true)
-      await Promise.all([loadMemberships(), loadUsers(), loadMembershipTypes()])
+      const usersData = await loadUsers()
+      await Promise.all([loadMemberships(usersData), loadMembershipTypes()])
     } finally {
       setIsLoading(false)
     }
   }
 
-  const loadMemberships = async () => {
+  const loadMemberships = async (usersData?: AdminUser[]) => {
     try {
-      const membershipsData = await getAdminMemberships()
+      const targetUserId = selectedUserId
+      const knownUsers = usersData ?? users
+      const membershipsData =
+        targetUserId && knownUsers.some((u) => u.id === targetUserId)
+          ? await getAdminMembershipsByUser(targetUserId)
+          : await getAdminMemberships()
       setMemberships(membershipsData)
     } catch (err) {
       console.error('회원권 로드 오류:', err)
     }
   }
 
-  const loadUsers = async () => {
+  const loadUsers = async (): Promise<AdminUser[]> => {
     try {
       const usersData = await getUsers()
       setUsers(usersData)
+      return usersData
     } catch (err) {
       console.error('회원 로드 오류:', err)
+      return []
     }
   }
 
@@ -78,7 +89,7 @@ const AdminMemberships = () => {
 
   const handleCreateMembership = () => {
     setEditingMembership(null)
-    setPresetUserId(null)
+    setPresetUserId(selectedUserId)
     setShowFormModal(true)
   }
 
@@ -132,6 +143,7 @@ const AdminMemberships = () => {
       }
       setShowFormModal(false)
       setEditingMembership(null)
+      setPresetUserId(null)
     } catch (err) {
       console.error('회원권 저장 오류:', err)
       alert(editingMembership ? '회원권 수정에 실패했습니다.' : '회원권 등록에 실패했습니다.')
@@ -144,7 +156,11 @@ const AdminMemberships = () => {
       <div className="container">
         <div className="admin-header">
           <h1>회원권 관리</h1>
-          <p className="admin-subtitle">전체 회원권 현황을 확인하고 관리하세요</p>
+          <p className="admin-subtitle">
+            {selectedUser
+              ? `${selectedUser.name} (${selectedUser.username || '-'}) 회원의 회원권을 관리하세요`
+              : '전체 회원권 현황을 확인하고 관리하세요'}
+          </p>
         </div>
 
         {/* 관리자 네비게이션 */}
@@ -194,8 +210,23 @@ const AdminMemberships = () => {
         </div>
 
         <div className="admin-controls">
+          {selectedUser && (
+            <div className="selected-user-panel">
+              <div>
+                <strong>선택 회원</strong>: {selectedUser.name}
+              </div>
+              <div>
+                <strong>아이디</strong>: {selectedUser.username || '-'}
+              </div>
+            </div>
+          )}
+          {selectedUser && (
+            <button className="back-btn" onClick={() => navigate('/admin/users')}>
+              회원관리로 돌아가기
+            </button>
+          )}
           <button className="create-btn" onClick={handleCreateMembership}>
-            + 회원권 등록
+            + {selectedUser ? `${selectedUser.name} 회원권 등록` : '회원권 등록'}
           </button>
         </div>
 
@@ -268,7 +299,6 @@ const AdminMemberships = () => {
             users={users}
             membershipTypes={membershipTypes}
             presetUserId={presetUserId}
-            onPresetConsumed={() => setPresetUserId(null)}
             onClose={() => {
               setShowFormModal(false)
               setEditingMembership(null)

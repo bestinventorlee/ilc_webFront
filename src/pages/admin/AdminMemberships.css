@@ -39,7 +39,39 @@
 .admin-controls {
   display: flex;
   justify-content: flex-end;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
   margin-bottom: 2rem;
+}
+
+.selected-user-panel {
+  margin-right: auto;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  color: var(--text-secondary);
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.back-btn {
+  padding: 0.75rem 1.25rem;
+  background: var(--bg-primary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.back-btn:hover {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
 }
 
 .create-btn {
@@ -183,6 +215,20 @@
 }
 
 @media (max-width: 640px) {
+  .admin-controls {
+    align-items: stretch;
+  }
+
+  .selected-user-panel {
+    margin-right: 0;
+    width: 100%;
+  }
+
+  .back-btn,
+  .create-btn {
+    width: 100%;
+  }
+
   .admin-table {
     font-size: 0.875rem;
   }
