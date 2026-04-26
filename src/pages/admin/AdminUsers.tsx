@@ -176,6 +176,7 @@ const AdminUsers = () => {
                           <button
                             type="button"
                             className="action-btn-small"
+                            style={{ width: '84px' }}
                             onClick={() => setSelectedUser(user)}
                           >
                             상세
@@ -183,6 +184,7 @@ const AdminUsers = () => {
                           <button
                             type="button"
                             className="action-btn-small edit-btn"
+                            style={{ width: '84px' }}
                             onClick={() => navigate(`/admin/users/${user.id}/memberships`)}
                           >
                             회원권
