@@ -13,6 +13,7 @@ import AdminRoute from './components/AdminRoute'
 import Dashboard from './pages/Dashboard'
 import ProjectDocs from './pages/ProjectDocs'
 import Membership from './pages/Membership'
+import TokenWallet from './pages/TokenWallet'
 import Profile from './pages/Profile'
 import Community from './pages/Community'
 import Library from './pages/Library'
@@ -81,6 +82,14 @@ function App() {
           element={
             <ProtectedRoute>
               <Membership />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/wallet"
+          element={
+            <ProtectedRoute>
+              <TokenWallet />
             </ProtectedRoute>
           }
         />

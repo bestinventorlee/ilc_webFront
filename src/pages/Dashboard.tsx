@@ -45,6 +45,15 @@ const Dashboard = () => {
           </div>
 
           <div className="dashboard-card">
+            <div className="card-icon">🪪</div>
+            <h3>개인 토큰 지갑</h3>
+            <p>회원권 기반 SBT 수령 가능 여부와 지갑 주소를 확인하세요</p>
+            <button className="card-button" onClick={() => navigate('/wallet')}>
+              지갑 보기
+            </button>
+          </div>
+
+          <div className="dashboard-card">
             <div className="card-icon">💬</div>
             <h3>커뮤니티</h3>
             <p>회원들과 소통하고 정보를 공유하세요</p>

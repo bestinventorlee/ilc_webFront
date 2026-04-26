@@ -118,6 +118,9 @@ const Header = () => {
                   <Link to="/membership" className={desktopLink('/membership')}>
                     회원권
                   </Link>
+                  <Link to="/wallet" className={desktopLink('/wallet')}>
+                    토큰 지갑
+                  </Link>
                   <Link to="/community" className={desktopLink('/community')}>
                     커뮤니티
                   </Link>
@@ -208,6 +211,13 @@ const Header = () => {
                       onClick={() => setMobileOpen(false)}
                     >
                       커뮤니티
+                    </Link>
+                    <Link
+                      to="/wallet"
+                      className={mobileLink('/wallet')}
+                      onClick={() => setMobileOpen(false)}
+                    >
+                      토큰 지갑
                     </Link>
                     <Link
                       to="/library"
