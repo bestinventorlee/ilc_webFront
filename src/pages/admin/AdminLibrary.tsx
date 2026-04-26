@@ -6,6 +6,7 @@ import {
   createLibraryItem,
   updateLibraryItem,
   deleteLibraryItem,
+  uploadLibraryFile,
 } from '../../services/adminService'
 import type { AdminLibraryItem } from '../../types/admin'
 import './AdminLibrary.css'
@@ -40,6 +41,10 @@ const AdminLibrary = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingItem, setEditingItem] = useState<AdminLibraryItem | null>(null)
   const [form, setForm] = useState<LibraryFormState>(initialForm)
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [selectedThumbnailFile, setSelectedThumbnailFile] = useState<File | null>(null)
+  const [isUploading, setIsUploading] = useState(false)
+  const [isThumbnailUploading, setIsThumbnailUploading] = useState(false)
 
   useEffect(() => {
     loadItems()
@@ -82,6 +87,51 @@ const AdminLibrary = () => {
     setIsModalOpen(false)
     setEditingItem(null)
     setForm(initialForm)
+    setSelectedFile(null)
+    setSelectedThumbnailFile(null)
+  }
+
+  const handleUploadFile = async () => {
+    if (!selectedFile) {
+      alert('업로드할 파일을 선택해주세요.')
+      return
+    }
+    try {
+      setIsUploading(true)
+      const uploaded = await uploadLibraryFile(selectedFile)
+      setForm((prev) => ({
+        ...prev,
+        downloadUrl: uploaded.downloadUrl,
+        fileType: uploaded.fileType,
+        fileSize: String(uploaded.fileSize),
+        title: prev.title || uploaded.originalName,
+      }))
+      alert('파일 업로드가 완료되었습니다.')
+    } catch (error) {
+      alert(error instanceof Error ? error.message : '파일 업로드 중 오류가 발생했습니다.')
+    } finally {
+      setIsUploading(false)
+    }
+  }
+
+  const handleUploadThumbnail = async () => {
+    if (!selectedThumbnailFile) {
+      alert('썸네일 파일을 선택해주세요.')
+      return
+    }
+    try {
+      setIsThumbnailUploading(true)
+      const uploaded = await uploadLibraryFile(selectedThumbnailFile)
+      setForm((prev) => ({
+        ...prev,
+        thumbnailUrl: uploaded.downloadUrl,
+      }))
+      alert('썸네일 업로드가 완료되었습니다.')
+    } catch (error) {
+      alert(error instanceof Error ? error.message : '썸네일 업로드 중 오류가 발생했습니다.')
+    } finally {
+      setIsThumbnailUploading(false)
+    }
   }
 
   const handleSubmit = async (e: FormEvent) => {
@@ -288,6 +338,21 @@ const AdminLibrary = () => {
                     />
                   </label>
                   <label>
+                    파일 업로드
+                    <input
+                      type="file"
+                      onChange={(e) => setSelectedFile(e.target.files?.[0] ?? null)}
+                    />
+                    <button
+                      type="button"
+                      className="upload-btn"
+                      onClick={handleUploadFile}
+                      disabled={isUploading}
+                    >
+                      {isUploading ? '업로드 중...' : '파일 업로드'}
+                    </button>
+                  </label>
+                  <label>
                     작성자
                     <input
                       type="text"
@@ -302,6 +367,19 @@ const AdminLibrary = () => {
                       value={form.thumbnailUrl}
                       onChange={(e) => setForm((prev) => ({ ...prev, thumbnailUrl: e.target.value }))}
                     />
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => setSelectedThumbnailFile(e.target.files?.[0] ?? null)}
+                    />
+                    <button
+                      type="button"
+                      className="upload-btn"
+                      onClick={handleUploadThumbnail}
+                      disabled={isThumbnailUploading}
+                    >
+                      {isThumbnailUploading ? '썸네일 업로드 중...' : '썸네일 업로드'}
+                    </button>
                   </label>
                   <label className="library-form-description">
                     설명

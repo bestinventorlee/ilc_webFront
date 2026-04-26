@@ -311,6 +311,29 @@ export const createLibraryItem = async (data: {
   return result.data
 }
 
+export const uploadLibraryFile = async (file: File): Promise<{
+  filename: string
+  originalName: string
+  fileType: string
+  fileSize: number
+  downloadUrl: string
+}> => {
+  const formData = new FormData()
+  formData.append('file', file)
+  const response = await fetch(`${API_BASE_URL}/admin/library/upload`, {
+    method: 'POST',
+    headers: {
+      ...getAuthHeader(),
+    },
+    body: formData,
+  })
+  const result = await response.json()
+  if (!response.ok) {
+    throw new Error(result.message || '파일 업로드에 실패했습니다.')
+  }
+  return result.data
+}
+
 export const updateLibraryItem = async (
   id: string,
   data: {
