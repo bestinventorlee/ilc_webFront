@@ -1,9 +1,16 @@
 import { useEffect, useMemo, useState } from 'react'
 import { usePrivy, useWallets } from '@privy-io/react-auth'
+import { useLocation } from 'react-router-dom'
 import Header from '../components/Header'
 import { getUser, saveUser } from '../utils/token'
 import { getMemberships } from '../services/membershipService'
-import { getMyProfile, getMyTokenTransfers, saveMyWalletAddress, type MyTokenTransfer } from '../services/authService'
+import {
+  getMyProfile,
+  getMyTokenTransfers,
+  saveMyWalletAddress,
+  sendMyToken,
+  type MyTokenTransfer,
+} from '../services/authService'
 import type { Membership as MembershipType } from '../types/membership'
 import './TokenWallet.css'
 
@@ -90,6 +97,7 @@ const PrivyWalletConnector = ({ onWalletSaved }: { onWalletSaved: (address: stri
 }
 
 const TokenWallet = () => {
+  const location = useLocation()
   const user = getUser()
   const [memberships, setMemberships] = useState<MembershipType[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -100,6 +108,10 @@ const TokenWallet = () => {
   const [transferHistory, setTransferHistory] = useState<MyTokenTransfer[]>([])
   const [transferLoading, setTransferLoading] = useState(true)
   const [transferError, setTransferError] = useState<string | null>(null)
+  const [manualWalletAddress, setManualWalletAddress] = useState('')
+  const [sendWalletAddress, setSendWalletAddress] = useState('')
+  const [sendAmount, setSendAmount] = useState('')
+  const [isSending, setIsSending] = useState(false)
 
   const walletAddress = useMemo(() => {
     if (savedWalletAddress) return savedWalletAddress
@@ -118,6 +130,15 @@ const TokenWallet = () => {
       autoRefreshTokenIfNeeded()
     })
   }, [])
+
+  useEffect(() => {
+    if (!location.hash) return
+    const targetId = location.hash.replace('#', '')
+    const element = document.getElementById(targetId)
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }, [location.hash])
 
   useEffect(() => {
     const loadMemberships = async () => {
@@ -175,6 +196,20 @@ const TokenWallet = () => {
     loadTransfers()
   }, [])
 
+  const reloadTransfers = async () => {
+    try {
+      setTransferLoading(true)
+      setTransferError(null)
+      const rows = await getMyTokenTransfers()
+      setTransferHistory(rows)
+    } catch {
+      setTransferHistory([])
+      setTransferError('지급 이력을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.')
+    } finally {
+      setTransferLoading(false)
+    }
+  }
+
   const handleSaveWalletAddress = async (address: string) => {
     try {
       const profile = await saveMyWalletAddress(address)
@@ -214,6 +249,49 @@ const TokenWallet = () => {
     }
   }
 
+  const handleManualWalletSave = async () => {
+    const address = manualWalletAddress.trim()
+    if (!address) {
+      alert('지갑 주소를 입력해 주세요.')
+      return
+    }
+    await handleSaveWalletAddress(address)
+    setManualWalletAddress('')
+  }
+
+  const handleSendToken = async () => {
+    const receiverWalletAddress = sendWalletAddress.trim()
+    const amount = sendAmount.trim()
+
+    if (!receiverWalletAddress) {
+      alert('받는 지갑 주소를 입력해 주세요.')
+      return
+    }
+
+    if (!receiverWalletAddress.startsWith('0x') || receiverWalletAddress.length < 20) {
+      alert('올바른 지갑 주소 형식이 아닙니다.')
+      return
+    }
+
+    if (!amount || Number.isNaN(Number(amount)) || Number(amount) <= 0) {
+      alert('전송 수량은 0보다 큰 숫자여야 합니다.')
+      return
+    }
+
+    setIsSending(true)
+    try {
+      await sendMyToken(receiverWalletAddress, amount)
+      alert('토큰 전송 요청이 접수되었습니다.')
+      setSendWalletAddress('')
+      setSendAmount('')
+      await reloadTransfers()
+    } catch (error) {
+      alert(error instanceof Error ? error.message : '토큰 전송 중 오류가 발생했습니다.')
+    } finally {
+      setIsSending(false)
+    }
+  }
+
   return (
     <div className="token-wallet">
       <Header />
@@ -221,7 +299,7 @@ const TokenWallet = () => {
         <h1>개인 토큰 지갑</h1>
         <p className="subtitle">회원권 기반 SBT 수령 상태와 개인 지갑 주소를 확인하세요</p>
 
-        <div className="wallet-card">
+        <div id="wallet-overview" className="wallet-card">
           <div className="wallet-card__header">
             <div>
               <p className="wallet-card__label">지갑 소유자</p>
@@ -285,7 +363,51 @@ const TokenWallet = () => {
               실제 SBT 발급은 관리자 배치 또는 온체인 민팅 프로세스와 연동될 때 자동 반영됩니다.
             </p>
           </section>
-          {PRIVY_ENABLED && <PrivyWalletConnector onWalletSaved={handleSaveWalletAddress} />}
+          <section id="token-settings" className="wallet-panel">
+            <h3>토큰 설정</h3>
+            <div className="wallet-manual-form">
+              <label htmlFor="walletAddressInput">수령 지갑 주소</label>
+              <input
+                id="walletAddressInput"
+                type="text"
+                placeholder="0x로 시작하는 지갑 주소 입력"
+                value={manualWalletAddress}
+                onChange={(e) => setManualWalletAddress(e.target.value)}
+              />
+              <button type="button" className="wallet-connect-btn" onClick={handleManualWalletSave}>
+                지갑 주소 저장
+              </button>
+            </div>
+            {PRIVY_ENABLED && <PrivyWalletConnector onWalletSaved={handleSaveWalletAddress} />}
+          </section>
+
+          <section id="token-send" className="wallet-panel">
+            <h3>토큰 보내기</h3>
+            <div className="wallet-send-form">
+              <label htmlFor="sendWalletAddressInput">받는 지갑 주소</label>
+              <input
+                id="sendWalletAddressInput"
+                type="text"
+                placeholder="0x로 시작하는 주소 입력"
+                value={sendWalletAddress}
+                onChange={(e) => setSendWalletAddress(e.target.value)}
+              />
+              <label htmlFor="sendAmountInput">전송 수량</label>
+              <input
+                id="sendAmountInput"
+                type="number"
+                min="0"
+                step="1"
+                placeholder="예: 10"
+                value={sendAmount}
+                onChange={(e) => setSendAmount(e.target.value)}
+              />
+              <button type="button" className="wallet-connect-btn" onClick={handleSendToken} disabled={isSending}>
+                {isSending ? '전송 중...' : '토큰 보내기'}
+              </button>
+            </div>
+            <p className="wallet-muted">전송 결과는 하단 지급 이력에서 상태를 확인할 수 있습니다.</p>
+          </section>
         </div>
 
         <section className="wallet-history" aria-labelledby="wallet-history-heading">

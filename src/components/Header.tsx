@@ -44,6 +44,8 @@ const Header = () => {
   const desktopLink = (path: string) =>
     isActivePath(path) ? 'ilc-nav__link ilc-nav__link--active' : 'ilc-nav__link'
 
+  const tokenMenuClass = location.pathname === '/wallet' ? 'ilc-nav__link ilc-nav__link--active' : 'ilc-nav__link'
+
   const mobileLink = (path: string) =>
     isActivePath(path)
       ? 'ilc-nav__mobile-link ilc-nav__mobile-link--active'
@@ -118,9 +120,22 @@ const Header = () => {
                   <Link to="/membership" className={desktopLink('/membership')}>
                     회원권
                   </Link>
-                  <Link to="/wallet" className={desktopLink('/wallet')}>
-                    토큰 지갑
-                  </Link>
+                  <div className="ilc-nav__token-menu">
+                    <button type="button" className={tokenMenuClass} aria-haspopup="true">
+                      토큰
+                    </button>
+                    <div className="ilc-nav__token-dropdown">
+                      <Link to="/wallet#wallet-overview" className="ilc-nav__token-item">
+                        지갑
+                      </Link>
+                      <Link to="/wallet#token-settings" className="ilc-nav__token-item">
+                        토큰 설정
+                      </Link>
+                      <Link to="/wallet#token-send" className="ilc-nav__token-item">
+                        토큰 보내기
+                      </Link>
+                    </div>
+                  </div>
                   <Link to="/community" className={desktopLink('/community')}>
                     커뮤니티
                   </Link>
@@ -206,18 +221,32 @@ const Header = () => {
                       회원권
                     </Link>
                     <Link
+                      to="/wallet#wallet-overview"
+                      className={mobileLink('/wallet')}
+                      onClick={() => setMobileOpen(false)}
+                    >
+                      토큰 · 지갑
+                    </Link>
+                    <Link
+                      to="/wallet#token-settings"
+                      className={mobileLink('/wallet')}
+                      onClick={() => setMobileOpen(false)}
+                    >
+                      토큰 · 설정
+                    </Link>
+                    <Link
+                      to="/wallet#token-send"
+                      className={mobileLink('/wallet')}
+                      onClick={() => setMobileOpen(false)}
+                    >
+                      토큰 · 보내기
+                    </Link>
+                    <Link
                       to="/community"
                       className={mobileLink('/community')}
                       onClick={() => setMobileOpen(false)}
                     >
                       커뮤니티
-                    </Link>
-                    <Link
-                      to="/wallet"
-                      className={mobileLink('/wallet')}
-                      onClick={() => setMobileOpen(false)}
-                    >
-                      토큰 지갑
                     </Link>
                     <Link
                       to="/library"

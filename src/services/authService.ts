@@ -254,3 +254,24 @@ export const getMyTokenTransfers = async (): Promise<MyTokenTransfer[]> => {
   }
   return (result.data || []) as MyTokenTransfer[]
 }
+
+export const sendMyToken = async (receiverWalletAddress: string, amount: string): Promise<void> => {
+  const { getAuthHeader } = await import('../utils/token')
+  const response = await fetch(`${API_BASE_URL}/auth/me/token-transfers`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...getAuthHeader(),
+    },
+    body: JSON.stringify({ receiverWalletAddress, amount }),
+  })
+
+  const result = await response.json().catch(() => null)
+
+  if (!response.ok) {
+    if (response.status === 404 || response.status === 405) {
+      throw new Error('회원간 토큰 전송 API가 아직 준비되지 않았습니다.')
+    }
+    throw new Error(result?.message || '토큰 전송에 실패했습니다.')
+  }
+}
