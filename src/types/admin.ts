@@ -3,6 +3,8 @@ export interface AdminUser {
   name: string
   username?: string
   email: string
+  tokenBalance: number
+  walletAddress: string
   role: 'admin' | 'user'
   createdAt: string
   lastLoginAt?: string

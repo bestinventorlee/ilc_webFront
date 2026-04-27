@@ -71,6 +71,8 @@ export const saveUser = (user: {
   username?: string
   email: string
   name: string
+  tokenBalance?: number
+  walletAddress?: string
   role?: 'admin' | 'user'
 }): void => {
   localStorage.setItem(USER_KEY, JSON.stringify(user))
@@ -84,6 +86,8 @@ export const getUser = (): {
   username?: string
   email: string
   name: string
+  tokenBalance?: number
+  walletAddress?: string
   role?: 'admin' | 'user'
 } | null => {
   const userStr = localStorage.getItem(USER_KEY)

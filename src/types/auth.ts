@@ -14,6 +14,8 @@ export interface SignUpResponse {
     username: string
     email?: string
     name: string
+    tokenBalance: number
+    walletAddress: string
     role: 'admin' | 'user'
     accessToken: string // Access Token (15분 만료)
     refreshToken: string // Refresh Token (7일 만료)
@@ -41,6 +43,8 @@ export interface LoginResponse {
     username: string
     email?: string
     name: string
+    tokenBalance: number
+    walletAddress: string
     role: 'admin' | 'user'
     accessToken: string // Access Token (15분 만료)
     refreshToken: string // Refresh Token (15일 만료)

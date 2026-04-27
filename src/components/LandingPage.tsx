@@ -199,6 +199,8 @@ const LandingPage = () => {
             username: response.data.username,
             email: response.data.email || '',
             name: response.data.name,
+            tokenBalance: response.data.tokenBalance ?? 0,
+            walletAddress: response.data.walletAddress || '',
             role: response.data.role,
           })
 
@@ -267,6 +269,8 @@ const LandingPage = () => {
           username: response.data.username,
           email: response.data.email || '',
           name: response.data.name,
+          tokenBalance: response.data.tokenBalance ?? 0,
+          walletAddress: response.data.walletAddress || '',
           role: response.data.role,
         })
 

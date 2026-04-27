@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import Header from '../../components/Header'
 import UserDetailModal from '../../components/UserDetailModal'
-import { getUsers } from '../../services/adminService'
+import { getUsers, sendTokenByAdmin, updateUserTokenBalance, updateUserWalletAddress } from '../../services/adminService'
 import type { AdminUser } from '../../types/admin'
 import './AdminUsers.css'
 
@@ -143,6 +143,8 @@ const AdminUsers = () => {
                   <th>이름</th>
                   <th>아이디</th>
                   <th>이메일</th>
+                  <th>지갑 주소</th>
+                  <th>토큰 수량</th>
                   <th>역할</th>
                   <th>가입일</th>
                   <th>최근 로그인</th>
@@ -152,7 +154,7 @@ const AdminUsers = () => {
               <tbody>
                 {filteredUsers.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="empty-message">
+                    <td colSpan={9} className="empty-message">
                       검색 결과가 없습니다.
                     </td>
                   </tr>
@@ -162,6 +164,8 @@ const AdminUsers = () => {
                       <td>{user.name}</td>
                       <td>{user.username || '-'}</td>
                       <td>{user.email}</td>
+                      <td>{user.walletAddress ? `${user.walletAddress.slice(0, 8)}...${user.walletAddress.slice(-6)}` : '-'}</td>
+                      <td>{user.tokenBalance ?? 0}</td>
                       <td>
                         <span className={`role-badge ${user.role}`}>
                           {user.role === 'admin' ? '관리자' : '회원'}
@@ -179,6 +183,74 @@ const AdminUsers = () => {
                             onClick={() => setSelectedUser(user)}
                           >
                             상세
+                          </button>
+                          <button
+                            type="button"
+                            className="action-btn-small btn-fixed"
+                            onClick={async () => {
+                              const raw = window.prompt(
+                                `${user.name} 회원의 토큰 수량을 입력하세요.`,
+                                String(user.tokenBalance ?? 0)
+                              )
+                              if (raw === null) return
+                              const next = Number(raw)
+                              if (!Number.isFinite(next) || next < 0) {
+                                alert('0 이상의 숫자를 입력해주세요.')
+                                return
+                              }
+                              try {
+                                await updateUserTokenBalance(user.id, Math.floor(next))
+                                await loadUsers()
+                              } catch (err) {
+                                alert(err instanceof Error ? err.message : '토큰 수량 수정에 실패했습니다.')
+                              }
+                            }}
+                          >
+                            토큰설정
+                          </button>
+                          <button
+                            type="button"
+                            className="action-btn-small btn-fixed"
+                            onClick={async () => {
+                              const raw = window.prompt(
+                                `${user.name} 회원에게 전송할 토큰 수량을 입력하세요.`,
+                                '1'
+                              )
+                              if (raw === null) return
+                              try {
+                                await sendTokenByAdmin(user.id, raw)
+                                alert('토큰 전송 요청이 완료되었습니다.')
+                                await loadUsers()
+                              } catch (err) {
+                                alert(err instanceof Error ? err.message : '토큰 전송에 실패했습니다.')
+                              }
+                            }}
+                          >
+                            토큰전송
+                          </button>
+                          <button
+                            type="button"
+                            className="action-btn-small btn-fixed"
+                            onClick={async () => {
+                              const raw = window.prompt(
+                                `${user.name} 회원의 지갑 주소를 입력하세요.`,
+                                user.walletAddress || ''
+                              )
+                              if (raw === null) return
+                              const addr = raw.trim()
+                              if (!/^0x[a-fA-F0-9]{40}$/.test(addr)) {
+                                alert('유효한 지갑 주소를 입력해주세요.')
+                                return
+                              }
+                              try {
+                                await updateUserWalletAddress(user.id, addr)
+                                await loadUsers()
+                              } catch (err) {
+                                alert(err instanceof Error ? err.message : '지갑 주소 저장에 실패했습니다.')
+                              }
+                            }}
+                          >
+                            지갑설정
                           </button>
                           <button
                             type="button"

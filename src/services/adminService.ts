@@ -77,6 +77,88 @@ export const getUsers = async (): Promise<AdminUser[]> => {
   }
 }
 
+export const updateUserTokenBalance = async (
+  userId: string,
+  tokenBalance: number
+): Promise<AdminUser> => {
+  const response = await fetch(`${API_BASE_URL}/admin/users/${userId}/token-balance`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      ...getAuthHeader(),
+    },
+    body: JSON.stringify({ tokenBalance }),
+  })
+  const result = await response.json()
+  if (!response.ok) {
+    throw new Error(result.message || '토큰 수량 수정에 실패했습니다.')
+  }
+  return result.data as AdminUser
+}
+
+export const updateUserWalletAddress = async (
+  userId: string,
+  walletAddress: string
+): Promise<AdminUser> => {
+  const response = await fetch(`${API_BASE_URL}/admin/users/${userId}/wallet-address`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      ...getAuthHeader(),
+    },
+    body: JSON.stringify({ walletAddress }),
+  })
+  const result = await response.json()
+  if (!response.ok) {
+    throw new Error(result.message || '지갑 주소 수정에 실패했습니다.')
+  }
+  return result.data as AdminUser
+}
+
+export interface AdminTokenTransfer {
+  id: string
+  userId: string
+  userName: string
+  username?: string
+  walletAddress: string
+  amount: string
+  tokenSymbol: string
+  txHash?: string
+  status: 'pending' | 'success' | 'failed'
+  errorMessage?: string
+  createdAt: string
+}
+
+export const getAdminTokenTransfers = async (): Promise<AdminTokenTransfer[]> => {
+  const response = await fetch(`${API_BASE_URL}/admin/token-transfers`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      ...getAuthHeader(),
+    },
+  })
+  const result = await response.json()
+  if (!response.ok) {
+    throw new Error(result.message || '토큰 전송 이력 조회에 실패했습니다.')
+  }
+  return (result.data || []) as AdminTokenTransfer[]
+}
+
+export const sendTokenByAdmin = async (userId: string, amount: string): Promise<void> => {
+  const response = await fetch(`${API_BASE_URL}/admin/token-transfers`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...getAuthHeader(),
+    },
+    body: JSON.stringify({ userId, amount }),
+  })
+  const result = await response.json()
+  if (!response.ok) {
+    throw new Error(result.message || '토큰 전송에 실패했습니다.')
+  }
+}
+
 /**
  * 회원권 목록 조회 (관리자용)
  */

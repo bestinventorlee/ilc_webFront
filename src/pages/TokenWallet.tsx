@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
+import { usePrivy, useWallets } from '@privy-io/react-auth'
 import Header from '../components/Header'
-import { getUser } from '../utils/token'
+import { getUser, saveUser } from '../utils/token'
 import { getMemberships } from '../services/membershipService'
+import { getMyProfile, getMyTokenTransfers, saveMyWalletAddress, type MyTokenTransfer } from '../services/authService'
 import type { Membership as MembershipType } from '../types/membership'
 import './TokenWallet.css'
 
@@ -21,17 +23,88 @@ const createWalletAddress = (seed: string) => {
 
 const shortenAddress = (address: string) => `${address.slice(0, 8)}...${address.slice(-6)}`
 
+const formatTransferDate = (iso: string) =>
+  new Date(iso).toLocaleString('ko-KR', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+
+const transferStatusLabel = (status: MyTokenTransfer['status']) => {
+  switch (status) {
+    case 'pending':
+      return '대기'
+    case 'success':
+      return '완료'
+    case 'failed':
+      return '실패'
+    default:
+      return status
+  }
+}
+
+const shortenTxHash = (hash?: string) =>
+  hash && hash.length > 14 ? `${hash.slice(0, 10)}…${hash.slice(-8)}` : hash || '-'
+const PRIVY_ENABLED = Boolean(import.meta.env.VITE_PRIVY_APP_ID)
+
+const PrivyWalletConnector = ({ onWalletSaved }: { onWalletSaved: (address: string) => void }) => {
+  const { ready, authenticated, login } = usePrivy()
+  const { wallets } = useWallets()
+
+  const embeddedWalletAddress = useMemo(
+    () => wallets.find((w) => w.walletClientType === 'privy')?.address ?? wallets[0]?.address ?? '',
+    [wallets]
+  )
+
+  return (
+    <div className="wallet-panel">
+      <h3>Privy 지갑 연결</h3>
+      {!ready ? (
+        <p className="wallet-muted">Privy 초기화 중...</p>
+      ) : !authenticated ? (
+        <button
+          type="button"
+          className="wallet-connect-btn"
+          onClick={() => login()}
+        >
+          Privy 로그인/지갑 생성
+        </button>
+      ) : embeddedWalletAddress ? (
+        <>
+          <p className="wallet-success">연결된 Privy 지갑: {shortenAddress(embeddedWalletAddress)}</p>
+          <button
+            type="button"
+            className="wallet-connect-btn"
+            onClick={() => onWalletSaved(embeddedWalletAddress)}
+          >
+            이 주소를 내 지갑으로 저장
+          </button>
+        </>
+      ) : (
+        <p className="wallet-muted">Privy 지갑 주소를 찾지 못했습니다.</p>
+      )}
+    </div>
+  )
+}
+
 const TokenWallet = () => {
   const user = getUser()
   const [memberships, setMemberships] = useState<MembershipType[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
+  const [tokenBalance, setTokenBalance] = useState<number>(user?.tokenBalance ?? 0)
+  const [savedWalletAddress, setSavedWalletAddress] = useState<string>(user?.walletAddress || '')
+  const [transferHistory, setTransferHistory] = useState<MyTokenTransfer[]>([])
+  const [transferLoading, setTransferLoading] = useState(true)
+  const [transferError, setTransferError] = useState<string | null>(null)
 
-  const walletAddress = useMemo(
-    () => createWalletAddress(`${user?.userId ?? ''}-${user?.email ?? ''}`),
-    [user?.email, user?.userId]
-  )
+  const walletAddress = useMemo(() => {
+    if (savedWalletAddress) return savedWalletAddress
+    return createWalletAddress(`${user?.userId ?? ''}-${user?.email ?? ''}`)
+  }, [savedWalletAddress, user?.email, user?.userId])
 
   const activeMemberships = useMemo(
     () => memberships.filter((membership) => membership.status === 'active'),
@@ -62,6 +135,74 @@ const TokenWallet = () => {
 
     loadMemberships()
   }, [])
+
+  useEffect(() => {
+    const loadProfile = async () => {
+      try {
+        const profile = await getMyProfile()
+        setTokenBalance(profile.tokenBalance ?? 0)
+        setSavedWalletAddress(profile.walletAddress || '')
+        saveUser({
+          userId: profile.userId,
+          username: profile.username,
+          email: profile.email || '',
+          name: profile.name,
+          tokenBalance: profile.tokenBalance ?? 0,
+          walletAddress: profile.walletAddress || '',
+          role: profile.role,
+        })
+      } catch {
+        setTokenBalance(user?.tokenBalance ?? 0)
+      }
+    }
+    loadProfile()
+  }, [user?.tokenBalance, user?.walletAddress])
+
+  useEffect(() => {
+    const loadTransfers = async () => {
+      try {
+        setTransferLoading(true)
+        setTransferError(null)
+        const rows = await getMyTokenTransfers()
+        setTransferHistory(rows)
+      } catch {
+        setTransferHistory([])
+        setTransferError('지급 이력을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.')
+      } finally {
+        setTransferLoading(false)
+      }
+    }
+    loadTransfers()
+  }, [])
+
+  const handleSaveWalletAddress = async (address: string) => {
+    try {
+      const profile = await saveMyWalletAddress(address)
+      setSavedWalletAddress(profile.walletAddress || address)
+      saveUser({
+        userId: profile.userId,
+        username: profile.username,
+        email: profile.email || '',
+        name: profile.name,
+        tokenBalance: profile.tokenBalance ?? 0,
+        walletAddress: profile.walletAddress || address,
+        role: profile.role,
+      })
+      alert('지갑 주소가 저장되었습니다.')
+    } catch (error) {
+      alert(error instanceof Error ? error.message : '지갑 주소 저장 중 오류가 발생했습니다.')
+    }
+  }
+
+  const handleCopyTxHash = async (hash?: string) => {
+    if (!hash) return
+    try {
+      await navigator.clipboard.writeText(hash)
+      alert('트랜잭션 해시가 복사되었습니다.')
+    } catch {
+      alert('복사에 실패했습니다.')
+    }
+  }
 
   const handleCopyAddress = async () => {
     try {
@@ -133,7 +274,7 @@ const TokenWallet = () => {
             <div className="token-rows">
               <div className="token-row">
                 <span>Membership SBT</span>
-                <strong>{canReceiveSbt ? `${activeMemberships.length} EA` : '0 EA'}</strong>
+                <strong>{tokenBalance} EA</strong>
               </div>
               <div className="token-row">
                 <span>지갑 상태</span>
@@ -144,7 +285,71 @@ const TokenWallet = () => {
               실제 SBT 발급은 관리자 배치 또는 온체인 민팅 프로세스와 연동될 때 자동 반영됩니다.
             </p>
           </section>
+          {PRIVY_ENABLED && <PrivyWalletConnector onWalletSaved={handleSaveWalletAddress} />}
         </div>
+
+        <section className="wallet-history" aria-labelledby="wallet-history-heading">
+          <div className="wallet-history__header">
+            <h3 id="wallet-history-heading">토큰 지급 이력</h3>
+            <p className="wallet-history__hint">일시, 트랜잭션 해시(Tx Hash), 처리 상태를 확인할 수 있습니다.</p>
+          </div>
+
+          {transferLoading ? (
+            <p className="wallet-muted">지급 이력을 불러오는 중...</p>
+          ) : transferError ? (
+            <p className="wallet-error">{transferError}</p>
+          ) : transferHistory.length === 0 ? (
+            <p className="wallet-muted">아직 지급 이력이 없습니다.</p>
+          ) : (
+            <div className="wallet-history__scroll">
+              <table className="wallet-history-table">
+                <thead>
+                  <tr>
+                    <th scope="col">일시</th>
+                    <th scope="col">금액</th>
+                    <th scope="col">Tx Hash</th>
+                    <th scope="col">상태</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {transferHistory.map((row) => (
+                    <tr key={row.id}>
+                      <td>{formatTransferDate(row.createdAt)}</td>
+                      <td>
+                        <span className="wallet-history-amount">
+                          {row.amount} {row.tokenSymbol}
+                        </span>
+                      </td>
+                      <td>
+                        <div className="wallet-history-tx">
+                          <code title={row.txHash}>{shortenTxHash(row.txHash)}</code>
+                          {row.txHash ? (
+                            <button
+                              type="button"
+                              className="wallet-history-copy"
+                              onClick={() => handleCopyTxHash(row.txHash)}
+                              aria-label="Tx Hash 복사"
+                            >
+                              복사
+                            </button>
+                          ) : null}
+                        </div>
+                      </td>
+                      <td>
+                        <span
+                          className={`wallet-history-status wallet-history-status--${row.status}`}
+                          title={row.status === 'failed' && row.errorMessage ? row.errorMessage : undefined}
+                        >
+                          {transferStatusLabel(row.status)}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
       </div>
     </div>
   )

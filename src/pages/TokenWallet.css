@@ -94,6 +94,20 @@
   background: var(--primary-dark);
 }
 
+.wallet-connect-btn {
+  border: none;
+  background: var(--primary-color);
+  color: #fff;
+  border-radius: 8px;
+  padding: 0.55rem 0.95rem;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.wallet-connect-btn:hover {
+  background: var(--primary-dark);
+}
+
 .wallet-address-full {
   margin-top: 0.75rem;
   color: var(--text-secondary);
@@ -149,6 +163,117 @@
 
 .wallet-error {
   color: #b91c1c;
+}
+
+.wallet-history {
+  margin-top: 1rem;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  box-shadow: var(--shadow-sm);
+  padding: 1.5rem;
+}
+
+.wallet-history__header {
+  margin-bottom: 1rem;
+}
+
+.wallet-history__header h3 {
+  margin-bottom: 0.35rem;
+}
+
+.wallet-history__hint {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.wallet-history__scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.wallet-history-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.wallet-history-table th,
+.wallet-history-table td {
+  text-align: left;
+  padding: 0.65rem 0.75rem;
+  border-bottom: 1px solid var(--border-color);
+  vertical-align: middle;
+}
+
+.wallet-history-table th {
+  color: var(--text-secondary);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.wallet-history-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.wallet-history-table tbody tr:hover td {
+  background: var(--bg-secondary);
+}
+
+.wallet-history-amount {
+  white-space: nowrap;
+}
+
+.wallet-history-tx {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.wallet-history-tx code {
+  font-size: 0.85rem;
+  color: var(--text-primary);
+}
+
+.wallet-history-copy {
+  flex-shrink: 0;
+  border: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border-radius: 6px;
+  padding: 0.2rem 0.45rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.wallet-history-copy:hover {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+.wallet-history-status {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+}
+
+.wallet-history-status--pending {
+  color: #92400e;
+  background: #fef3c7;
+}
+
+.wallet-history-status--success {
+  color: #047857;
+  background: #d1fae5;
+}
+
+.wallet-history-status--failed {
+  color: #b91c1c;
+  background: #fee2e2;
 }
 
 @media (max-width: 640px) {

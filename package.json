@@ -13,6 +13,7 @@
     "server:db-clear-non-user": "cd server && npm run db:clear-non-user --"
   },
   "dependencies": {
+    "@privy-io/react-auth": "^3.22.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.20.0"
@@ -30,4 +31,3 @@
     "vite": "^5.0.8"
   }
 }
-
