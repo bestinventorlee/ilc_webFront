@@ -29,6 +29,17 @@
   margin-bottom: 2rem;
 }
 
+.profile-load-error {
+  color: #dc2626;
+  font-size: 0.9375rem;
+  margin-bottom: 1rem;
+}
+
+.inline-actions {
+  margin-top: 0;
+  justify-content: flex-start;
+}
+
 .profile-content {
   display: flex;
   flex-direction: column;

@@ -180,6 +180,43 @@ export const logout = async (refreshToken: string): Promise<void> => {
   }
 }
 
+export interface ProfileUserPayload {
+  userId: string
+  username: string
+  email?: string
+  name: string
+  tokenBalance: number
+  walletAddress: string
+  role: 'admin' | 'user'
+  accessToken?: string
+}
+
+/**
+ * 프로필 수정 (이름·이메일·비밀번호; 아이디는 변경 불가)
+ */
+export const updateProfile = async (body: {
+  name?: string
+  email?: string
+  currentPassword?: string
+  newPassword?: string
+  confirmPassword?: string
+}): Promise<ProfileUserPayload> => {
+  const { getAuthHeader } = await import('../utils/token')
+  const response = await fetch(`${API_BASE_URL}/auth/profile`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      ...getAuthHeader(),
+    },
+    body: JSON.stringify(body),
+  })
+  const result = await response.json()
+  if (!response.ok) {
+    throw new Error(result.message || '프로필 저장에 실패했습니다.')
+  }
+  return result.data as ProfileUserPayload
+}
+
 export const getMyProfile = async (): Promise<{
   userId: string
   username: string
